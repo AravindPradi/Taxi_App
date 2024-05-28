@@ -1,0 +1,390 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Trip</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/touring.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://bootswatch.com/5/flatly/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .previous-trip {
+            float: right;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+    display: none;
+}
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}"><b>Take A Trip</b></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'all_trips' %}">Trip Details</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            {% for message in messages %}
+                        <div class="alert alert-success mt-3 success-message" role="alert">
+                        {{ message }}
+                        </div>
+                        {% endfor %}
+            <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733;border-color: white;border-radius: 18px;border-width: 3px;">
+                <div class="card-body" style="color: white;">
+                    <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
+                    <p>Add your trip details here..</p><br>
+                    
+                    <form class="requires-validation" novalidate method="post" action="{% url 'add_trip_details' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="trip_type" id="km" value="km">
+                                    <label class="form-check-label" for="km">Kilometers</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="trip_type" id="hour" value="hour">
+                                    <label class="form-check-label" for="hour">Hours</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary previous-trip">Get last Trip</button>
+                        </div>
+                        
+                        
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
+                                
+                                <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="date" name="date" >
+                                <div class="valid-feedback">Date field is valid!</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" >
+                            <div class="valid-feedback">Vehicle name field is valid!</div>
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="vehicle_number" placeholder="Vehicle Number*" >
+                            <div class="valid-feedback">Vehicle number field is valid!</div>
+                        </div>
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <input class="form-control" type="text" name="fixed_charge" placeholder="Fixed Charge*" >
+                                
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="text" name="max_km" placeholder="Max Kilometer*" >
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="extra_chrge" placeholder="Extra charge per km*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" >
+                        </div>
+
+                        <div id="kilometers-fields">
+                            <div class="mb-3 row">
+                                <div class="col">
+                                    <input class="form-control" type="text" name="start_km" placeholder="Starting Kilometer*" >
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" name="end_km" placeholder="Ending Kilometer*" >
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="hours-fields" class="hidden">
+                            <div class="mb-3 row">
+                                <div class="col">
+                                    <input class="form-control" type="text" name="start_hour" placeholder="Starting Hour*" >
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="text" name="end_hour" placeholder="Ending Hour*" >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <input class="form-control" type="text" name="strt_place" placeholder="Starting Place*" >
+                                
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="text" name="time" placeholder="Time*" >
+                            </div>
+                        </div>
+
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <input class="form-control" type="text" name="destination" placeholder="Destination*" >
+                                
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="text" name="time_arrival" placeholder="Time of Arrival*" >
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <p>Trip end date*</p>
+                            <input class="form-control" type="date" name="arrival_date" placeholder="Arrival date*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <p></p>
+                            <input class="form-control" type="text" name="trip_days" placeholder="No of days*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <p>Additional charges*</p>
+                            <div id="inputContainer">
+                                <div class="input-group mb-2">
+                                    <input class="form-control" type="text" name="toll" placeholder="Toll*" >
+                                    
+                                </div>
+                            </div>
+                            <button class="btn btn-light add-btn mt-2" type="button">Toll +</button>
+                        </div>
+
+                        <div class="mb-3">
+                            <div id="inputContainer1">
+                                <div class="input-group mb-2">
+                                    <input class="form-control" type="text" name="guidefee" placeholder="Guide Fee*" >
+                                    
+                                </div>
+                            </div>
+                            <button class="btn btn-light add-btn2 mt-2" type="button">Fee +</button>
+                        </div>
+
+                        <div class="mb-3">
+                            <p>Additional charges</p>
+                            <div id="inputContainer2">
+                                <div class="input-group mb-2">
+                                    <input class="form-control" type="text" name="add_charges" placeholder="Additional charges*" >
+                                    
+                                </div>
+                            </div>
+                            <button class="btn btn-light add-btn3 mt-2" type="button">Add +</button>
+                        </div>
+
+                        <div class="mb-3">
+                            <h5 class="text-center">Payment details</h5>
+                            <input class="form-control" type="text" name="tot_charge" placeholder="Total Charge*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="advance" placeholder="Advance*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <input class="form-control" type="text" name="balance" placeholder="Balance amount*" >
+                        </div>
+
+                        <div class="mb-3">
+                            <button class="btn btn-primary">Submit Trip Details</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Javascript -->
+<script>
+
+var successMessages = document.querySelectorAll('.success-message');
+        
+    
+        successMessages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.transition = "opacity 1s";
+                message.style.opacity = "0";
+            }, 3000);
+        });
+
+
+
+     document.addEventListener("DOMContentLoaded", function() {
+        const inputContainer = document.getElementById("inputContainer");
+        
+        function addInputField() {
+            const newInputGroup = document.createElement("div");
+            newInputGroup.classList.add("input-group");
+            newInputGroup.innerHTML = `
+                <input class="form-control mb-2" type="text" name="toll" placeholder="Toll*" required>
+                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
+            `;
+            inputContainer.appendChild(newInputGroup);
+        }
+        function removeInputField(event) {
+            const parentInputGroup = event.target.parentElement;
+            inputContainer.removeChild(parentInputGroup);
+        }
+
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("add-btn")) {
+                addInputField();
+            }
+        });
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("remove-btn")) {
+                removeInputField(event);
+            }
+        });
+    });
+
+
+    // guide fee
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputContainer = document.getElementById("inputContainer1");
+        
+        function addInputField() {
+            const newInputGroup = document.createElement("div");
+            newInputGroup.classList.add("input-group");
+            newInputGroup.innerHTML = `
+                <input class="form-control mb-2" type="text" name="guidefee" placeholder="Guide Fee*" required>
+                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
+            `;
+            inputContainer.appendChild(newInputGroup);
+        }
+        function removeInputField(event) {
+            const parentInputGroup = event.target.parentElement;
+            inputContainer.removeChild(parentInputGroup);
+        }
+
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("add-btn2")) {
+                addInputField();
+            }
+        });
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("remove-btn")) {
+                removeInputField(event);
+            }
+        });
+    });
+
+
+    // Additional charges
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputContainer = document.getElementById("inputContainer2");
+        
+        function addInputField() {
+            const newInputGroup = document.createElement("div");
+            newInputGroup.classList.add("input-group");
+            newInputGroup.innerHTML = `
+                <input class="form-control mb-2" type="text" name="add_charges" placeholder="Additional charges*" required>
+                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
+            `;
+            inputContainer.appendChild(newInputGroup);
+        }
+        function removeInputField(event) {
+            const parentInputGroup = event.target.parentElement;
+            inputContainer.removeChild(parentInputGroup);
+        }
+
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("add-btn3")) {
+                addInputField();
+            }
+        });
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("remove-btn")) {
+                removeInputField(event);
+            }
+        });
+    });
+
+
+// Dynamic Trip number
+
+document.addEventListener('DOMContentLoaded', function() {
+        var tripNumber = document.getElementById('trip_no_hidden').value;
+        document.getElementById('trip_no_display').value = tripNumber;
+    });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const kmRadioButton = document.getElementById('km');
+    const hourRadioButton = document.getElementById('hour');
+    const kilometersFields = document.getElementById('kilometers-fields');
+    const hoursFields = document.getElementById('hours-fields');
+
+    kmRadioButton.addEventListener('change', function() {
+        if (this.checked) {
+            kilometersFields.classList.remove('hidden');
+            hoursFields.classList.add('hidden');
+        }
+    });
+
+    hourRadioButton.addEventListener('change', function() {
+        if (this.checked) {
+            hoursFields.classList.remove('hidden');
+            kilometersFields.classList.add('hidden');
+        }
+    });
+
+    if (kmRadioButton.checked) {
+        kilometersFields.classList.remove('hidden');
+        hoursFields.classList.add('hidden');
+    } else if (hourRadioButton.checked) {
+        hoursFields.classList.remove('hidden');
+        kilometersFields.classList.add('hidden');
+    } else {
+        kilometersFields.classList.add('hidden');
+        hoursFields.classList.add('hidden');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+
+</body>
+</html>

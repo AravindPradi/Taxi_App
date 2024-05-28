@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Trip Details</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Trip Number</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Vehicle Name</th>
+                    <th scope="col">Driver Name</th>
+                    <th scope="col">Guest Name</th>
+                    <th scope="col">Start Kilometer</th>
+                    <th scope="col">End Kilometer</th>
+                    <th scope="col">Start Place</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Total Charge</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trip_item in trip %}
+                <tr>
+                    <td>{{ trip_item.trip_no }}</td>
+                    <td>{{ trip_item.date }}</td>
+                    <td>{{ trip_item.vehicle_name }}</td>
+                    <td>{{ trip_item.driver_name }}</td>
+                    <td>{{ trip_item.guest_name }}</td>
+                    <td>{{ trip_item.start_km }}</td>
+                    <td>{{ trip_item.end_km }}</td>
+                    <td>{{ trip_item.start_place }}</td>
+                    <td>{{ trip_item.destination }}</td>
+                    <td>{{ trip_item.tot_charge }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
