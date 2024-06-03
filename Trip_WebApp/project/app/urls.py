@@ -15,6 +15,11 @@ urlpatterns = [
 
     path('add_trip_details',views.add_trip_details,name='add_trip_details'),
 
-    path('all_trip_details',views.all_trips,name='all_trips'),
+    path('all_trip_table',views.all_trip_table,name='all_trip_table'),
+
+    path('trip_view/<int:id>',views.trip_view,name='trip_view'),
+
+    path('delete_trip/<int:id>',views.delete_trip,name='delete_trip'),
+
     
 ]
