@@ -55,9 +55,8 @@
                     <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                     <p>Add your trip details here..</p><br>
 
-                    <form class="requires-validation" novalidate method="post" action="{% url 'add_trip_details' %}">
+                    <form class="requires-validation" novalidate method="post" action="{% url 'update_trip' data.id %}">
                         {% csrf_token %}
-
                         <div class="mb-3 d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="form-check form-check-inline">
@@ -69,9 +68,9 @@
                                     <label class="form-check-label" for="hour">Hours</label>
                                 </div>
                             </div>
-                            <a href="{% url 'update_last_trip' %}" class="btn btn-outline-secondary">Get Last Trip</a>
+                            <button class="btn btn-primary previous-trip" type="button">Get last Trip</button>
                         </div>
-
+                    
                         <div class="mb-3 row">
                             <div class="col">
                                 <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
@@ -82,17 +81,16 @@
                                 <div class="valid-feedback">Date field is valid!</div>
                             </div>
                         </div>
-
+                    
                         <div class="mb-3">
                             <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" aria-required="true" >
                             <div class="invalid-feedback" id="vehicle_number_error">Invalid vehicle number format.</div>
-                          </div>
-
+                        </div>
+                    
                         <div class="mb-3">
                             <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" aria-required="true" >
-
                         </div>
-
+                    
                         <div class="mb-3 row">
                             <div class="col">
                                 <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required >
@@ -101,19 +99,19 @@
                                 <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" >
                             </div>
                         </div>
-
+                    
                         <div class="mb-3">
                             <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" >
                         </div>
-
+                    
                         <div class="mb-3">
                             <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" aria-required="true">
                         </div>
-
+                    
                         <div class="mb-3">
                             <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" aria-required="true">
                         </div>
-
+                    
                         <div id="kilometers-fields">
                             <div class="mb-3 row">
                                 <div class="col">
@@ -124,7 +122,7 @@
                                 </div>
                             </div>
                         </div>
-
+                    
                         <div id="hours-fields" class="hidden">
                             <div class="mb-3 row">
                                 <div class="col">
@@ -135,7 +133,7 @@
                                 </div>
                             </div>
                         </div>
-
+                    
                         <div class="mb-3 row">
                             <div class="col">
                                 <input class="form-control" type="text" name="strt_place" placeholder="Starting Place*" >
@@ -144,7 +142,7 @@
                                 <input class="form-control" type="time" name="time" placeholder="Time*">
                             </div>
                         </div>
-
+                    
                         <div class="mb-3 row">
                             <div class="col">
                                 <input class="form-control" type="text" name="destination" placeholder="Destination*">
@@ -153,30 +151,29 @@
                                 <input class="form-control" type="time" name="time_arrival" placeholder="Time of Arrival*">
                             </div>
                         </div>
-
+                    
                         <div class="mb-3">
                             <p>Trip end date*</p>
                             <input class="form-control" type="date" name="arrival_date" placeholder="Arrival date*" >
                         </div>
-
+                    
                         <div class="mb-3">
                             <p></p>
                             <input class="form-control" type="number" name="trip_days" placeholder="No of days*" >
                         </div>
-
+                    
                         <div class="mb-3">
                             <p>Additional charges*</p>
                             <div id="inputContainer">
                                 <p>*Toll</p>
                                 <div class="input-group mb-2">
-                                    
                                     <input class="form-control" type="number" id="toll" name="toll" value="0" placeholder="Toll*" >
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn mt-2" type="button">Toll +</button>
                         </div>
                         <hr style="height: 3px;">
-
+                    
                         <div class="mb-3">
                             <div id="inputContainer1">
                                 <div class="input-group mb-2">
@@ -185,7 +182,7 @@
                             </div>
                             <button class="btn btn-light add-btn2 mt-2" type="button">Fee +</button>
                         </div>
-
+                    
                         <div class="mb-3">
                             <p>Additional charges</p>
                             <div id="inputContainer2">
@@ -196,20 +193,20 @@
                             <button class="btn btn-light add-btn3 mt-2" type="button">Add +</button>
                         </div>
                         <hr style="height: 3px;">
-
+                    
                         <div class="mb-3">
                             <h5 class="text-center">Payment details</h5>
                             <input class="form-control" type="number" id="tot_charge" name="tot_charge" placeholder="Total Charge*" >
                         </div>
-
+                    
                         <div class="mb-3">
                             <input class="form-control" type="number" id="advance" name="advance" placeholder="Advance*" >
                         </div>
-
+                    
                         <div class="mb-3">
                             <input class="form-control" type="number" id="balance" name="balance" placeholder="Balance amount*" >
                         </div>
-
+                    
                         <div class="mb-3">
                             <button class="btn btn-primary">Submit Trip Details</button>
                         </div>
@@ -222,9 +219,47 @@
 
 <script>
 
+async function getLastTripDetails() {
+    try {
+      const response = await fetch('{% url "get_last_trip_details" %}');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const latestTrip = await response.json();
 
 
+      document.getElementById('trip_no_hidden').value = latestTrip.trip_no;
+      document.getElementById('trip_no_display').value = latestTrip.trip_no;
+      document.querySelector('input[name="date"]').value = latestTrip.date;
+      document.querySelector('input[name="vehicle_number"]').value = latestTrip.vehicle_number;
+      document.querySelector('input[name="vehicle_name"]').value = latestTrip.vehicle_name;
+      document.getElementById('fixed_charge').value = latestTrip.fixed_charge;
+      document.getElementById('max_km').value = latestTrip.max_km;
+      document.getElementById('extra_charge').value = latestTrip.extra_charge;
+      document.querySelector('input[name="driver_name"]').value = latestTrip.driver_name;
+      document.querySelector('input[name="guest_name"]').value = latestTrip.guest_name;
+      document.getElementById('start_km').value = latestTrip.start_km;
+      document.getElementById('end_km').value = latestTrip.end_km;
+      document.querySelector('input[name="strt_place"]').value = latestTrip.strt_place;
+      document.querySelector('input[name="time"]').value = latestTrip.time;
+      document.querySelector('input[name="destination"]').value = latestTrip.destination;
+      document.querySelector('input[name="time_arrival"]').value = latestTrip.time_arrival;
+      document.querySelector('input[name="arrival_date"]').value = latestTrip.arrival_date;
+      document.querySelector('input[name="trip_days"]').value = latestTrip.trip_days;
+      document.getElementById('toll').value = latestTrip.toll;
+      document.getElementById('guidefee').value = latestTrip.guidefee;
+      document.getElementById('add_charges').value = latestTrip.add_charges;
+      document.getElementById('tot_charge').value = latestTrip.tot_charge;
+      document.getElementById('advance').value = latestTrip.advance;
+      document.getElementById('balance').value = latestTrip.balance;
 
+    } catch (error) {
+      console.error('Error fetching the latest trip details:', error);
+    }
+  }
+
+ 
+  document.querySelector('.previous-trip').addEventListener('click', getLastTripDetails);
 
 
 

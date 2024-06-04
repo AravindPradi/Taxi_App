@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib import messages
 from .models import UserProfile
 from django.contrib.auth.models import User
@@ -292,6 +293,78 @@ def delete_trip(request,id):
     trip.delete()
     messages.info(request,'{{trip.trip_no}} Deleted successfully')
     return redirect('all_trip_table')
+
+
+def get_last_trip_details(request):
+    latest_trip = Trip.objects.latest('trip_no')
+    trip_data = {
+        'trip_no':latest_trip.trip_no,
+        'date':latest_trip.date,
+        'vehicle_name':latest_trip.vehicle_name,
+        'vehicle_number':latest_trip.vehicle_number,
+        'fixed_charge':latest_trip.fixed_charge,
+        'max_km': latest_trip.max_km,
+        'extra_charge': latest_trip.extra_charge,
+        'driver_name': latest_trip.driver_name,
+        'guest_name': latest_trip.guest_name,
+        'start_km': latest_trip.start_km,
+        'end_km': latest_trip.end_km,
+        'strt_place': latest_trip.strt_place,
+        'time': latest_trip.time,
+        'destination': latest_trip.destination,
+        'time_arrival': latest_trip.time_arrival,
+        'arrival_date': latest_trip.arrival_date,
+        'trip_days': latest_trip.trip_days,
+        'toll': latest_trip.toll,
+        'guidefee': latest_trip.guidefee,
+        'add_charges': latest_trip.add_charges,
+        'tot_charge': latest_trip.tot_charge,
+        'advance': latest_trip.advance,
+        'balance': latest_trip.balance,
+    }
+    
+    return JsonResponse(trip_data)
+
+
+
+def update_last_trip(request):
+    return render(request,'update_details.html')
+
+
+def update_trip(request,id):
+    if request.method == 'POST':
+        data = get_object_or_404(True,id=id)
+        data.trip_type = request.POST.get('trip_type')
+        data.date = request.POST['date']
+        data.vehicle_name = request.POST['vehicle_name']
+        data.vehicle_number = request.POST['vehicle_number']
+        data.fixed_charge = request.POST['fixed_charge']
+        data.max_km = request.POST['max_km']
+        data.extra_charge = request.POST.get('extra_charge')
+        data.start_km = request.POST['start_km']
+        data.end_km = request.POST.get('end_km')
+        data.start_hour = request.POST.get('start_hour')
+        data.end_hour = request.POST.get('end_hour')
+        data.strt_place = request.POST.get('strt_place')
+        data.time = request.POST['time']
+        data.destination = request.POST['destination']
+        data.time_arrival = request.POST.get('time_arrival')
+        data.arrival_date = request.POST.get('arrival_date')
+        data.trip_days = request.POST.get('trip_days')
+        data.toll = request.POST.get('toll')
+        data.guidefee = request.POST.get('guidefee')
+
+
+
+
+
+        data.save()
+        return redirect('all_trip_table')
+
+    data = Trip.objects.get(id=id)
+    context = {'data':data}
+
+    return render(request,'update_details.html',context=context)
 
 
 

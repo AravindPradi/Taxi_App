@@ -21,5 +21,10 @@ urlpatterns = [
 
     path('delete_trip/<int:id>',views.delete_trip,name='delete_trip'),
 
+    path('get_last_trip_details',views.get_last_trip_details,name='get_last_trip_details'),
+
+    path('update_last_trip_page',views.update_last_trip,name='update_last_trip'),
+
+    path('update_trip/<int:id>/',views.update_trip,name='update_trip'),
     
 ]
