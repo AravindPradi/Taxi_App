@@ -45,8 +45,8 @@
         <div class="col-md-7">
             {% if messages %}
             <ul>
-                {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% for errors in error %}
+                    <li class="{{ message.tags }}">{{ errors }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
@@ -55,7 +55,7 @@
                     <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                     <p>Add your trip details here..</p><br>
 
-                    <form class="requires-validation" novalidate method="post" action="{% url 'update_trip' data.id %}">
+                    <form class="requires-validation" novalidate method="post" action="{% url 'submit_trip' %}">
                         {% csrf_token %}
                         <div class="mb-3 d-flex justify-content-between align-items-center">
                             <div>
@@ -74,51 +74,51 @@
                         <div class="mb-3 row">
                             <div class="col">
                                 <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
-                                <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
+                                <input class="form-control" type="text" id="trip_no_display" placeholder="Cannot change*" value="{{latest_trip_number}}" readonly>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="date" name="date" aria-required="true" >
+                                <input class="form-control" type="date" name="date"  value="{{ data.date }}" >
                                 <div class="valid-feedback">Date field is valid!</div>
                             </div>
                         </div>
                     
                         <div class="mb-3">
-                            <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" aria-required="true" >
+                            <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" value="" aria-required="true" >
                             <div class="invalid-feedback" id="vehicle_number_error">Invalid vehicle number format.</div>
                         </div>
                     
                         <div class="mb-3">
-                            <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" aria-required="true" >
+                            <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" value="" aria-required="true" >
                         </div>
                     
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required >
+                                <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" value="" aria-required="true" required >
                             </div>
                             <div class="col">
-                                <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" >
+                                <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" value="" aria-required="true" >
                             </div>
                         </div>
                     
                         <div class="mb-3">
-                            <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" >
+                            <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" value="" aria-required="true" >
                         </div>
                     
                         <div class="mb-3">
-                            <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" aria-required="true">
+                            <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" value="" aria-required="true">
                         </div>
                     
                         <div class="mb-3">
-                            <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" aria-required="true">
+                            <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" value="" aria-required="true">
                         </div>
                     
                         <div id="kilometers-fields">
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="number" id="start_km" name="start_km" placeholder="Starting Kilometer*" >
+                                    <input class="form-control" type="number" id="start_km" name="start_km" value="{{data.start_km}}" placeholder="Starting Kilometer*" >
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer*" >
+                                    <input class="form-control" type="number" id="end_km" name="end_km" value="{{data.end_km}}" placeholder="Ending Kilometer*" >
                                 </div>
                             </div>
                         </div>
@@ -126,35 +126,35 @@
                         <div id="hours-fields" class="hidden">
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="datetime" name="start_hour" placeholder="Starting Hour*">
+                                    <input class="form-control" type="datetime" name="start_hour" value="{{data.start_hour}}" placeholder="Starting Hour*">
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="datetime" name="end_hour" placeholder="Ending Hour*">
+                                    <input class="form-control" type="datetime" name="end_hour" value="{{data.end_hour}}" placeholder="Ending Hour*">
                                 </div>
                             </div>
                         </div>
                     
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="text" name="strt_place" placeholder="Starting Place*" >
+                                <input class="form-control" type="text" name="strt_place"  value="{{data.strt_place}}" placeholder="Starting Place*" >
                             </div>
                             <div class="col">
-                                <input class="form-control" type="time" name="time" placeholder="Time*">
+                                <input class="form-control" type="time" name="time" value="{{data.time}}" placeholder="Time*">
                             </div>
                         </div>
                     
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="text" name="destination" placeholder="Destination*">
+                                <input class="form-control" type="text" value="{{data.destination}}" name="destination" placeholder="Destination*">
                             </div>
                             <div class="col">
-                                <input class="form-control" type="time" name="time_arrival" placeholder="Time of Arrival*">
+                                <input class="form-control" type="time" name="time_arrival" value="{{data.time_arrival}}" placeholder="Time of Arrival*">
                             </div>
                         </div>
                     
                         <div class="mb-3">
                             <p>Trip end date*</p>
-                            <input class="form-control" type="date" name="arrival_date" placeholder="Arrival date*" >
+                            <input class="form-control" type="date" name="arrival_date" value="{{data.arrival_date}}" placeholder="Arrival date*" >
                         </div>
                     
                         <div class="mb-3">
@@ -208,7 +208,7 @@
                         </div>
                     
                         <div class="mb-3">
-                            <button class="btn btn-primary">Submit Trip Details</button>
+                            <button class="btn btn-primary" type="submit" >Submit Trip Details</button>
                         </div>
                     </form>
                 </div>
@@ -218,6 +218,75 @@
 </div>
 
 <script>
+
+
+function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        function submitFormData() {
+            const form = document.querySelector('form.requires-validation');
+            const formData = new FormData(form);
+
+            fetch('{% url "submit_trip" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Form submitted successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error.message);
+            });
+        }
+
+        document.querySelector('form.requires-validation').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            submitFormData();
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 async function getLastTripDetails() {
     try {

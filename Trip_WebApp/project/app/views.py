@@ -331,45 +331,154 @@ def update_last_trip(request):
     return render(request,'update_details.html')
 
 
-def update_trip(request,id):
+
+
+
+logger = logging.getLogger(__name__)
+
+def submit_trip(request):
     if request.method == 'POST':
-        data = get_object_or_404(True,id=id)
-        data.trip_type = request.POST.get('trip_type')
-        data.date = request.POST['date']
-        data.vehicle_name = request.POST['vehicle_name']
-        data.vehicle_number = request.POST['vehicle_number']
-        data.fixed_charge = request.POST['fixed_charge']
-        data.max_km = request.POST['max_km']
-        data.extra_charge = request.POST.get('extra_charge')
-        data.start_km = request.POST['start_km']
-        data.end_km = request.POST.get('end_km')
-        data.start_hour = request.POST.get('start_hour')
-        data.end_hour = request.POST.get('end_hour')
-        data.strt_place = request.POST.get('strt_place')
-        data.time = request.POST['time']
-        data.destination = request.POST['destination']
-        data.time_arrival = request.POST.get('time_arrival')
-        data.arrival_date = request.POST.get('arrival_date')
-        data.trip_days = request.POST.get('trip_days')
-        data.toll = request.POST.get('toll')
-        data.guidefee = request.POST.get('guidefee')
+        trip_no = request.POST.get('trip_no')  
+        trip_type = request.POST.get('trip_type')
+        date = request.POST.get('date')
+        vehicle_number = request.POST.get('vehicle_number')
+        vehicle_name = request.POST.get('vehicle_name')
 
+        fixed_charge = request.POST.get('fixed_charge')
+        try:
+            fixed_charge = float(fixed_charge)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid fixed charge amount.'}, status=400)
 
+        max_km = request.POST.get('max_km')
+        if trip_type == 'km' and max_km:
+            try:
+                max_km = int(max_km)
+                if max_km <= 0:
+                    return JsonResponse({'error': 'Max kilometer cannot be negative or zero.'}, status=400)
+            except ValueError:
+                return JsonResponse({'error': 'Invalid max kilometer value.'}, status=400)
+        else:
+            max_km = None  
 
+        extra_charge = request.POST.get('extra_charge')
+        try:
+            extra_charge = float(extra_charge)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid extra charge amount.'}, status=400)
 
+        driver_name = request.POST.get('driver_name')
+        guest_name = request.POST.get('guest_name')
 
-        data.save()
-        return redirect('all_trip_table')
+        start_km = None
+        end_km = None
+        start_hour = None
+        end_hour = None
 
-    data = Trip.objects.get(id=id)
-    context = {'data':data}
+        if trip_type == 'km':
+            start_km = request.POST.get('start_km')
+            if start_km:
+                try:
+                    start_km = int(start_km)
+                    if start_km < 0:
+                        return JsonResponse({'error': 'Starting kilometer cannot be negative.'}, status=400)
+                except ValueError:
+                    return JsonResponse({'error': 'Invalid starting kilometer value.'}, status=400)
 
-    return render(request,'update_details.html',context=context)
+            end_km = request.POST.get('end_km')
+            if end_km:
+                try:
+                    end_km = int(end_km)
+                    if end_km < start_km:
+                        return JsonResponse({'error': 'Ending kilometer cannot be less than starting kilometer.'}, status=400)
+                except ValueError:
+                    return JsonResponse({'error': 'Invalid ending kilometer value.'}, status=400)
+        else:
+            start_hour = request.POST.get('start_hour')  
+            end_hour = request.POST.get('end_hour')  
 
+        strt_place = request.POST.get('strt_place')
+        time = request.POST.get('time')  
+        destination = request.POST.get('destination')
+        time_arrival = request.POST.get('time_arrival')  
+        arrival_date = request.POST.get('arrival_date')
 
+        trip_days = request.POST.get('trip_days')
+        try:
+            trip_days = int(trip_days)
+            if trip_days <= 0:
+                return JsonResponse({'error': 'Number of days cannot be negative or zero.'}, status=400)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid number of days.'}, status=400)
 
+        toll = request.POST.get('toll')
+        try:
+            toll = float(toll)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid toll amount.'}, status=400)
 
+        guidefee = request.POST.get('guidefee')
+        try:
+            guidefee = float(guidefee)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid guide fee amount.'}, status=400)
 
+        add_charges = request.POST.get('add_charges')
+        try:
+            add_charges = float(add_charges)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid additional charges amount.'}, status=400)
+
+        tot_charge = request.POST.get('tot_charge')
+        try:
+            tot_charge = float(tot_charge)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid total charge amount.'}, status=400)
+
+        advance = request.POST.get('advance')
+        try:
+            advance = float(advance)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid advance amount.'}, status=400)
+
+        balance = tot_charge - advance
+
+        try:
+            new_trip = Trip.objects.create(
+                trip_no=trip_no,
+                trip_type=trip_type,
+                date=date,
+                vehicle_number=vehicle_number,                   
+                vehicle_name=vehicle_name,
+                fixed_charge=fixed_charge,
+                max_km=max_km,
+                extra_charge=extra_charge,
+                driver_name=driver_name,
+                guest_name=guest_name,
+                start_km=start_km,
+                end_km=end_km,
+                start_hour=start_hour,
+                end_hour=end_hour,
+                strt_place=strt_place,
+                time=time,
+                destination=destination,
+                time_arrival=time_arrival,
+                arrival_date=arrival_date,
+                trip_days=trip_days,
+                toll=toll,
+                guidefee=guidefee,
+                add_charges=add_charges,
+                tot_charge=tot_charge,
+                advance=advance,
+                balance=balance
+            )
+            new_trip.save()
+            return JsonResponse({'message': 'Trip details submitted successfully.'})
+        except Exception as e:
+            logger.error(f"Error creating trip: {e}")
+            return JsonResponse({'error': f'An error occurred: {e}'}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 
 
