@@ -222,7 +222,7 @@
               id="pdfBtn"
               onclick="reportPDF()"
             >
-              &nbsp;Download pdf</a
+              &nbsp;Download invoice</a
             >
           </div>
 
@@ -261,11 +261,12 @@
                 <div class="col-8 mb-0">
                   <p>Starting Km: {{ trip.start_km }}Km</b></p>
                   <p>Ending Km: {{ trip.end_km }}Km</p>
+                  <p>Trip start date: {{ trip.date }}</p>
                   <p>Trip end date: {{ trip.arrival_date }}</p>
                   <p><b>No of days:</b> {{ trip.trip_days }}</p>
                 </div>
                 <div class="col-4 mb-0">
-                  <p>Fixed charge per {{ trip.max_km }}Km : ₹.{{ trip.fixed_charge }}</p>
+                  <p>Fixed charge: ₹.{{ trip.fixed_charge }}</p>
                   <p>Extra charge per Km : ₹.{{ trip.extra_charge }}</p>
                   <p>Toll : ₹.{{ trip.toll }}</p>
                   <p>Guide fee: ₹.{{ trip.guideFee }}</p>
@@ -291,7 +292,7 @@
                 </div>
               </div>
               <div class="invoice-price-right">
-                <small>TOTAL</small>
+                <small>TOTAL AMOUNT TO PAY</small>
                 <span class="f-w-600">₹{{ trip.balance }}</span>
               </div>
             </div>

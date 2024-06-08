@@ -25,6 +25,6 @@ urlpatterns = [
 
     path('update_last_trip_page',views.update_last_trip,name='update_last_trip'),
 
-    path('submit_trip', views.submit_trip, name='submit_trip'),
+    path('update_trip/', views.update_trip, name='update_trip'),
     
 ]

@@ -16,8 +16,8 @@
         }
 
         .hidden {
-    display: none;
-}
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -49,7 +49,7 @@
                     <li class="{{ message.tags }}">{{ message }}</li>
                 {% endfor %}
             </ul>
-        {% endif %}
+            {% endif %}
             <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733; border-color: white; border-radius: 18px; border-width: 3px;">
                 <div class="card-body" style="color: white;">
                     <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
@@ -86,11 +86,10 @@
                         <div class="mb-3">
                             <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" aria-required="true" >
                             <div class="invalid-feedback" id="vehicle_number_error">Invalid vehicle number format.</div>
-                          </div>
+                        </div>
 
                         <div class="mb-3">
                             <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" aria-required="true" >
-
                         </div>
 
                         <div class="mb-3 row">
@@ -128,10 +127,10 @@
                         <div id="hours-fields" class="hidden">
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="datetime" name="start_hour" placeholder="Starting Hour*">
+                                    <input class="form-control" type="datetime-local" name="start_hour" placeholder="Starting Hour*">
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="datetime" name="end_hour" placeholder="Ending Hour*">
+                                    <input class="form-control" type="datetime-local" name="end_hour" placeholder="Ending Hour*">
                                 </div>
                             </div>
                         </div>
@@ -167,10 +166,8 @@
                         <div class="mb-3">
                             <p>Additional charges*</p>
                             <div id="inputContainer">
-                                <p>*Toll</p>
                                 <div class="input-group mb-2">
-                                    
-                                    <input class="form-control" type="number" id="toll" name="toll" value="0" placeholder="Toll*" >
+                                    <input class="form-control" type="number" name="toll" value="0" placeholder="Toll*" >
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn mt-2" type="button">Toll +</button>
@@ -180,7 +177,7 @@
                         <div class="mb-3">
                             <div id="inputContainer1">
                                 <div class="input-group mb-2">
-                                    <input class="form-control" type="number" id="guidefee" value="0" name="guidefee" placeholder="Guide Fee*" >
+                                    <input class="form-control" type="number" value="0" name="guidefee" placeholder="Guide Fee*" >
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn2 mt-2" type="button">Fee +</button>
@@ -190,7 +187,7 @@
                             <p>Additional charges</p>
                             <div id="inputContainer2">
                                 <div class="input-group mb-2">
-                                    <input class="form-control" type="number" id="add_charges" value="0" name="add_charges" placeholder="Additional charges*" >
+                                    <input class="form-control" type="number" value="0" name="add_charges" placeholder="Additional charges*" >
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn3 mt-2" type="button">Add +</button>
@@ -211,7 +208,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <button class="btn btn-primary">Submit Trip Details</button>
+                            <button class="btn btn-primary" type="submit">Submit Trip Details</button>
                         </div>
                     </form>
                 </div>
@@ -221,133 +218,49 @@
 </div>
 
 <script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 document.addEventListener("DOMContentLoaded", function() {
-        const inputContainer = document.getElementById("inputContainer");
-        
-        function addInputField() {
-            const newInputGroup = document.createElement("div");
-            newInputGroup.classList.add("input-group");
-            newInputGroup.innerHTML = `
-                <input class="form-control mb-2" type="text" name="toll" placeholder="Toll*" required>
-                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-        function removeInputField(event) {
-            const parentInputGroup = event.target.parentElement;
-            inputContainer.removeChild(parentInputGroup);
-        }
+    // Function to add input fields
+    function addInputField(containerId, inputName, placeholderText) {
+        const container = document.getElementById(containerId);
+        const newInputGroup = document.createElement("div");
+        newInputGroup.classList.add("input-group");
+        newInputGroup.innerHTML = `
+            <input class="form-control mb-2" type="number" name="${inputName}" placeholder="${placeholderText}" required>
+            <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
+        `;
+        container.appendChild(newInputGroup);
+        newInputGroup.querySelector('input').addEventListener('input', calculateTotalCharge);
+    }
 
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-btn")) {
-                addInputField();
-            }
-        });
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("remove-btn")) {
-                removeInputField(event);
-            }
-        });
+    // Function to remove input fields
+    function removeInputField(event) {
+        const parentInputGroup = event.target.parentElement;
+        parentInputGroup.querySelector('input').removeEventListener('input', calculateTotalCharge);
+        parentInputGroup.remove();
+        calculateTotalCharge();
+    }
+
+    // Event listeners for adding input fields
+    document.addEventListener("click", function(event) {
+        if (event.target.classList.contains("add-btn")) {
+            addInputField("inputContainer", "toll", "Toll*");
+        }
+        if (event.target.classList.contains("add-btn2")) {
+            addInputField("inputContainer1", "guidefee", "Guide Fee*");
+        }
+        if (event.target.classList.contains("add-btn3")) {
+            addInputField("inputContainer2", "add_charges", "Additional charges*");
+        }
+        if (event.target.classList.contains("remove-btn")) {
+            removeInputField(event);
+        }
     });
 
+    // Dynamic Trip number
+    var tripNumber = document.getElementById('trip_no_hidden').value;
+    document.getElementById('trip_no_display').value = tripNumber;
 
-    // guide fee
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputContainer = document.getElementById("inputContainer1");
-        
-        function addInputField() {
-            const newInputGroup = document.createElement("div");
-            newInputGroup.classList.add("input-group");
-            newInputGroup.innerHTML = `
-                <input class="form-control mb-2" type="text" name="guidefee" placeholder="Guide Fee*" required>
-                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-        function removeInputField(event) {
-            const parentInputGroup = event.target.parentElement;
-            inputContainer.removeChild(parentInputGroup);
-        }
-
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-btn2")) {
-                addInputField();
-            }
-        });
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("remove-btn")) {
-                removeInputField(event);
-            }
-        });
-    });
-
-
-    // Additional charges
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputContainer = document.getElementById("inputContainer2");
-        
-        function addInputField() {
-            const newInputGroup = document.createElement("div");
-            newInputGroup.classList.add("input-group");
-            newInputGroup.innerHTML = `
-                <input class="form-control mb-2" type="text" name="add_charges" placeholder="Additional charges*" required>
-                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-        function removeInputField(event) {
-            const parentInputGroup = event.target.parentElement;
-            inputContainer.removeChild(parentInputGroup);
-        }
-
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-btn3")) {
-                addInputField();
-            }
-        });
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("remove-btn")) {
-                removeInputField(event);
-            }
-        });
-    });
-
-
-// Dynamic Trip number
-
-document.addEventListener('DOMContentLoaded', function() {
-        var tripNumber = document.getElementById('trip_no_hidden').value;
-        document.getElementById('trip_no_display').value = tripNumber;
-    });
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide kilometers and hours fields based on selected trip type
     const kmRadioButton = document.getElementById('km');
     const hourRadioButton = document.getElementById('hour');
     const kilometersFields = document.getElementById('kilometers-fields');
@@ -377,19 +290,14 @@ document.addEventListener('DOMContentLoaded', function() {
         kilometersFields.classList.add('hidden');
         hoursFields.classList.add('hidden');
     }
-});
 
-
-
-function calculateTotalCharge() {
-        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value);
-        var maxKm = parseFloat(document.getElementById('max_km').value);
-        var extraCharge = parseFloat(document.getElementById('extra_charge').value);
-        var startKm = parseFloat(document.getElementById('start_km').value);
-        var endKm = parseFloat(document.getElementById('end_km').value);
-        var toll = parseFloat(document.getElementById('toll').value);
-        var guideFee = parseFloat(document.getElementById('guidefee').value);
-        var addCharges = parseFloat(document.getElementById('add_charges').value);
+    // Calculate total charge
+    function calculateTotalCharge() {
+        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+        var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
+        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
+        var startKm = parseFloat(document.getElementById('start_km').value) || 0;
+        var endKm = parseFloat(document.getElementById('end_km').value) || 0;
 
         // Calculate total kilometers traveled
         var totalKmTraveled = endKm - startKm;
@@ -401,30 +309,40 @@ function calculateTotalCharge() {
         }
 
         // Calculate total charge
-        var totalCharge = fixedCharge + extraCharges + toll + guideFee + addCharges;
+        var totalCharge = fixedCharge + extraCharges;
+
+        // Add toll, guide fee, and additional charges
+        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+
         document.getElementById('tot_charge').value = totalCharge.toFixed(2);
+        calculateBalance();
     }
 
-    // Function to calculate balance
+    // Calculate balance
     function calculateBalance() {
-        var totalCharge = parseFloat(document.getElementById('tot_charge').value);
-        var advance = parseFloat(document.getElementById('advance').value);
+        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+        var advance = parseFloat(document.getElementById('advance').value) || 0;
         var balance = totalCharge - advance;
         document.getElementById('balance').value = balance.toFixed(2);
     }
 
-    document.getElementById('fixed_charge').addEventListener('input', calculateTotalCharge);
-    document.getElementById('max_km').addEventListener('input', calculateTotalCharge);
-    document.getElementById('extra_charge').addEventListener('input', calculateTotalCharge);
-    document.getElementById('start_km').addEventListener('input', calculateTotalCharge);
-    document.getElementById('end_km').addEventListener('input', calculateTotalCharge);
-    document.getElementById('toll').addEventListener('input', calculateTotalCharge);
-    document.getElementById('guidefee').addEventListener('input', calculateTotalCharge);
-    document.getElementById('add_charges').addEventListener('input', calculateTotalCharge);
-    document.getElementById('tot_charge').addEventListener('input', calculateBalance);
-    document.getElementById('advance').addEventListener('input', calculateBalance);
-</script>
+    // Add event listeners to initial input fields
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculateTotalCharge);
+    });
 
+    // Initial calculation
+    calculateTotalCharge();
+});
+</script>
 
 </body>
 </html>

@@ -14,10 +14,9 @@
             float: right;
             margin-bottom: 10px;
         }
-
         .hidden {
-    display: none;
-}
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -45,17 +44,16 @@
         <div class="col-md-7">
             {% if messages %}
             <ul>
-                {% for errors in error %}
-                    <li class="{{ message.tags }}">{{ errors }}</li>
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
                 {% endfor %}
             </ul>
-        {% endif %}
+            {% endif %}
             <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733; border-color: white; border-radius: 18px; border-width: 3px;">
                 <div class="card-body" style="color: white;">
                     <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                     <p>Add your trip details here..</p><br>
-
-                    <form class="requires-validation" novalidate method="post" action="{% url 'submit_trip' %}">
+                    <form class="requires-validation" novalidate method="post">
                         {% csrf_token %}
                         <div class="mb-3 d-flex justify-content-between align-items-center">
                             <div>
@@ -115,10 +113,10 @@
                         <div id="kilometers-fields">
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="number" id="start_km" name="start_km" value="{{data.start_km}}" placeholder="Starting Kilometer*" >
+                                    <input class="form-control" type="number" id="start_km" name="start_km" placeholder="Starting Kilometer*" >
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="number" id="end_km" name="end_km" value="{{data.end_km}}" placeholder="Ending Kilometer*" >
+                                    <input class="form-control" type="number" id="end_km" name="end_km" value="" placeholder="Ending Kilometer*" >
                                 </div>
                             </div>
                         </div>
@@ -126,35 +124,35 @@
                         <div id="hours-fields" class="hidden">
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="datetime" name="start_hour" value="{{data.start_hour}}" placeholder="Starting Hour*">
+                                    <input class="form-control" type="datetime" name="start_hour" value="" placeholder="Starting Hour*">
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="datetime" name="end_hour" value="{{data.end_hour}}" placeholder="Ending Hour*">
+                                    <input class="form-control" type="datetime" name="end_hour" value="" placeholder="Ending Hour*">
                                 </div>
                             </div>
                         </div>
                     
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="text" name="strt_place"  value="{{data.strt_place}}" placeholder="Starting Place*" >
+                                <input class="form-control" type="text" name="strt_place"  value="" placeholder="Starting Place*" >
                             </div>
                             <div class="col">
-                                <input class="form-control" type="time" name="time" value="{{data.time}}" placeholder="Time*">
+                                <input class="form-control" type="time" name="time" value="" placeholder="Time*">
                             </div>
                         </div>
                     
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="text" value="{{data.destination}}" name="destination" placeholder="Destination*">
+                                <input class="form-control" type="text" value="" name="destination" placeholder="Destination*">
                             </div>
                             <div class="col">
-                                <input class="form-control" type="time" name="time_arrival" value="{{data.time_arrival}}" placeholder="Time of Arrival*">
+                                <input class="form-control" type="time" name="time_arrival" value="" placeholder="Time of Arrival*">
                             </div>
                         </div>
                     
                         <div class="mb-3">
                             <p>Trip end date*</p>
-                            <input class="form-control" type="date" name="arrival_date" value="{{data.arrival_date}}" placeholder="Arrival date*" >
+                            <input class="form-control" type="date" name="arrival_date" value="" placeholder="Arrival date*" >
                         </div>
                     
                         <div class="mb-3">
@@ -207,8 +205,8 @@
                             <input class="form-control" type="number" id="balance" name="balance" placeholder="Balance amount*" >
                         </div>
                     
-                        <div class="mb-3">
-                            <button class="btn btn-primary" type="submit" >Submit Trip Details</button>
+                        <div class="mb-3">        
+                            <button class="btn btn-secondary" type="button" id="update-trip">Update Trip Details</button>
                         </div>
                     </form>
                 </div>
@@ -220,57 +218,54 @@
 <script>
 
 
-function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+
+document.getElementById('update-trip').addEventListener('click', function() {
+    const tripData = {
+        trip_no: document.getElementById('trip_no_hidden').value,
+        date: document.querySelector('input[name="date"]').value,
+        vehicle_number: document.querySelector('input[name="vehicle_number"]').value,
+        vehicle_name: document.querySelector('input[name="vehicle_name"]').value,
+        fixed_charge: document.getElementById('fixed_charge').value,
+        max_km: document.getElementById('max_km').value,
+        extra_charge: document.getElementById('extra_charge').value,
+        driver_name: document.querySelector('input[name="driver_name"]').value,
+        guest_name: document.querySelector('input[name="guest_name"]').value,
+        start_km: document.getElementById('start_km').value,
+        end_km: document.getElementById('end_km').value,
+        strt_place: document.querySelector('input[name="strt_place"]').value,
+        time: document.querySelector('input[name="time"]').value,
+        destination: document.querySelector('input[name="destination"]').value,
+        time_arrival: document.querySelector('input[name="time_arrival"]').value,
+        arrival_date: document.querySelector('input[name="arrival_date"]').value,
+        trip_days: document.querySelector('input[name="trip_days"]').value,
+        toll: document.getElementById('toll').value,
+        guidefee: document.getElementById('guidefee').value,
+        add_charges: document.getElementById('add_charges').value,
+        tot_charge: document.getElementById('tot_charge').value,
+        advance: document.getElementById('advance').value,
+        balance: document.getElementById('balance').value
+    };
+
+    fetch("{% url 'update_trip' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(tripData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+        } else {
+            alert(data.message);
         }
-
-        const csrftoken = getCookie('csrftoken');
-
-        function submitFormData() {
-            const form = document.querySelector('form.requires-validation');
-            const formData = new FormData(form);
-
-            fetch('{% url "submit_trip" %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': csrftoken
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.error); });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Form submitted successfully:', data);
-            })
-            .catch(error => {
-                console.error('Error submitting form:', error.message);
-            });
-        }
-
-        document.querySelector('form.requires-validation').addEventListener('submit', function(event) {
-            event.preventDefault(); 
-            submitFormData();
-        });
-
-
-
-
-
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
 
 
 
@@ -290,46 +285,42 @@ function getCookie(name) {
 
 async function getLastTripDetails() {
     try {
-      const response = await fetch('{% url "get_last_trip_details" %}');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const latestTrip = await response.json();
+        const response = await fetch('{% url "get_last_trip_details" %}');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const latestTrip = await response.json();
 
-
-      document.getElementById('trip_no_hidden').value = latestTrip.trip_no;
-      document.getElementById('trip_no_display').value = latestTrip.trip_no;
-      document.querySelector('input[name="date"]').value = latestTrip.date;
-      document.querySelector('input[name="vehicle_number"]').value = latestTrip.vehicle_number;
-      document.querySelector('input[name="vehicle_name"]').value = latestTrip.vehicle_name;
-      document.getElementById('fixed_charge').value = latestTrip.fixed_charge;
-      document.getElementById('max_km').value = latestTrip.max_km;
-      document.getElementById('extra_charge').value = latestTrip.extra_charge;
-      document.querySelector('input[name="driver_name"]').value = latestTrip.driver_name;
-      document.querySelector('input[name="guest_name"]').value = latestTrip.guest_name;
-      document.getElementById('start_km').value = latestTrip.start_km;
-      document.getElementById('end_km').value = latestTrip.end_km;
-      document.querySelector('input[name="strt_place"]').value = latestTrip.strt_place;
-      document.querySelector('input[name="time"]').value = latestTrip.time;
-      document.querySelector('input[name="destination"]').value = latestTrip.destination;
-      document.querySelector('input[name="time_arrival"]').value = latestTrip.time_arrival;
-      document.querySelector('input[name="arrival_date"]').value = latestTrip.arrival_date;
-      document.querySelector('input[name="trip_days"]').value = latestTrip.trip_days;
-      document.getElementById('toll').value = latestTrip.toll;
-      document.getElementById('guidefee').value = latestTrip.guidefee;
-      document.getElementById('add_charges').value = latestTrip.add_charges;
-      document.getElementById('tot_charge').value = latestTrip.tot_charge;
-      document.getElementById('advance').value = latestTrip.advance;
-      document.getElementById('balance').value = latestTrip.balance;
-
+        document.getElementById('trip_no_hidden').value = latestTrip.trip_no;
+        document.getElementById('trip_no_display').value = latestTrip.trip_no;
+        document.querySelector('input[name="date"]').value = latestTrip.date;
+        document.querySelector('input[name="vehicle_number"]').value = latestTrip.vehicle_number;
+        document.querySelector('input[name="vehicle_name"]').value = latestTrip.vehicle_name;
+        document.getElementById('fixed_charge').value = latestTrip.fixed_charge;
+        document.getElementById('max_km').value = latestTrip.max_km;
+        document.getElementById('extra_charge').value = latestTrip.extra_charge;
+        document.querySelector('input[name="driver_name"]').value = latestTrip.driver_name;
+        document.querySelector('input[name="guest_name"]').value = latestTrip.guest_name;
+        document.getElementById('start_km').value = latestTrip.start_km;
+        document.getElementById('end_km').value = latestTrip.end_km;
+        document.querySelector('input[name="strt_place"]').value = latestTrip.strt_place;
+        document.querySelector('input[name="time"]').value = latestTrip.time;
+        document.querySelector('input[name="destination"]').value = latestTrip.destination;
+        document.querySelector('input[name="time_arrival"]').value = latestTrip.time_arrival;
+        document.querySelector('input[name="arrival_date"]').value = latestTrip.arrival_date;
+        document.querySelector('input[name="trip_days"]').value = latestTrip.trip_days;
+        document.getElementById('toll').value = latestTrip.toll;
+        document.getElementById('guidefee').value = latestTrip.guidefee;
+        document.getElementById('add_charges').value = latestTrip.add_charges;
+        document.getElementById('tot_charge').value = latestTrip.tot_charge;
+        document.getElementById('advance').value = latestTrip.advance;
+        document.getElementById('balance').value = latestTrip.balance;
     } catch (error) {
-      console.error('Error fetching the latest trip details:', error);
+        console.error('Error fetching the latest trip details:', error);
     }
-  }
+}
 
- 
-  document.querySelector('.previous-trip').addEventListener('click', getLastTripDetails);
-
+document.querySelector('.previous-trip').addEventListener('click', getLastTripDetails);
 
 
 
@@ -349,109 +340,48 @@ async function getLastTripDetails() {
 
 
 document.addEventListener("DOMContentLoaded", function() {
-        const inputContainer = document.getElementById("inputContainer");
-        
-        function addInputField() {
-            const newInputGroup = document.createElement("div");
-            newInputGroup.classList.add("input-group");
-            newInputGroup.innerHTML = `
-                <input class="form-control mb-2" type="text" name="toll" placeholder="Toll*" required>
-                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-        function removeInputField(event) {
-            const parentInputGroup = event.target.parentElement;
-            inputContainer.removeChild(parentInputGroup);
-        }
+    // Function to add input fields
+    function addInputField(containerId, inputName, placeholderText) {
+        const container = document.getElementById(containerId);
+        const newInputGroup = document.createElement("div");
+        newInputGroup.classList.add("input-group");
+        newInputGroup.innerHTML = `
+            <input class="form-control mb-2" type="number" name="${inputName}" placeholder="${placeholderText}" required>
+            <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
+        `;
+        container.appendChild(newInputGroup);
+        newInputGroup.querySelector('input').addEventListener('input', calculateTotalCharge);
+    }
 
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-btn")) {
-                addInputField();
-            }
-        });
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("remove-btn")) {
-                removeInputField(event);
-            }
-        });
+    // Function to remove input fields
+    function removeInputField(event) {
+        const parentInputGroup = event.target.parentElement;
+        parentInputGroup.querySelector('input').removeEventListener('input', calculateTotalCharge);
+        parentInputGroup.remove();
+        calculateTotalCharge();
+    }
+
+    // Event listeners for adding input fields
+    document.addEventListener("click", function(event) {
+        if (event.target.classList.contains("add-btn")) {
+            addInputField("inputContainer", "toll", "Toll*");
+        }
+        if (event.target.classList.contains("add-btn2")) {
+            addInputField("inputContainer1", "guidefee", "Guide Fee*");
+        }
+        if (event.target.classList.contains("add-btn3")) {
+            addInputField("inputContainer2", "add_charges", "Additional charges*");
+        }
+        if (event.target.classList.contains("remove-btn")) {
+            removeInputField(event);
+        }
     });
 
+    // Dynamic Trip number
+    var tripNumber = document.getElementById('trip_no_hidden').value;
+    document.getElementById('trip_no_display').value = tripNumber;
 
-    // guide fee
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputContainer = document.getElementById("inputContainer1");
-        
-        function addInputField() {
-            const newInputGroup = document.createElement("div");
-            newInputGroup.classList.add("input-group");
-            newInputGroup.innerHTML = `
-                <input class="form-control mb-2" type="text" name="guidefee" placeholder="Guide Fee*" required>
-                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-        function removeInputField(event) {
-            const parentInputGroup = event.target.parentElement;
-            inputContainer.removeChild(parentInputGroup);
-        }
-
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-btn2")) {
-                addInputField();
-            }
-        });
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("remove-btn")) {
-                removeInputField(event);
-            }
-        });
-    });
-
-
-    // Additional charges
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputContainer = document.getElementById("inputContainer2");
-        
-        function addInputField() {
-            const newInputGroup = document.createElement("div");
-            newInputGroup.classList.add("input-group");
-            newInputGroup.innerHTML = `
-                <input class="form-control mb-2" type="text" name="add_charges" placeholder="Additional charges*" required>
-                <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
-            `;
-            inputContainer.appendChild(newInputGroup);
-        }
-        function removeInputField(event) {
-            const parentInputGroup = event.target.parentElement;
-            inputContainer.removeChild(parentInputGroup);
-        }
-
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-btn3")) {
-                addInputField();
-            }
-        });
-        document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("remove-btn")) {
-                removeInputField(event);
-            }
-        });
-    });
-
-
-// Dynamic Trip number
-
-document.addEventListener('DOMContentLoaded', function() {
-        var tripNumber = document.getElementById('trip_no_hidden').value;
-        document.getElementById('trip_no_display').value = tripNumber;
-    });
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide kilometers and hours fields based on selected trip type
     const kmRadioButton = document.getElementById('km');
     const hourRadioButton = document.getElementById('hour');
     const kilometersFields = document.getElementById('kilometers-fields');
@@ -481,19 +411,14 @@ document.addEventListener('DOMContentLoaded', function() {
         kilometersFields.classList.add('hidden');
         hoursFields.classList.add('hidden');
     }
-});
 
-
-
-function calculateTotalCharge() {
-        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value);
-        var maxKm = parseFloat(document.getElementById('max_km').value);
-        var extraCharge = parseFloat(document.getElementById('extra_charge').value);
-        var startKm = parseFloat(document.getElementById('start_km').value);
-        var endKm = parseFloat(document.getElementById('end_km').value);
-        var toll = parseFloat(document.getElementById('toll').value);
-        var guideFee = parseFloat(document.getElementById('guidefee').value);
-        var addCharges = parseFloat(document.getElementById('add_charges').value);
+    // Calculate total charge
+    function calculateTotalCharge() {
+        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+        var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
+        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
+        var startKm = parseFloat(document.getElementById('start_km').value) || 0;
+        var endKm = parseFloat(document.getElementById('end_km').value) || 0;
 
         // Calculate total kilometers traveled
         var totalKmTraveled = endKm - startKm;
@@ -505,28 +430,39 @@ function calculateTotalCharge() {
         }
 
         // Calculate total charge
-        var totalCharge = fixedCharge + extraCharges + toll + guideFee + addCharges;
+        var totalCharge = fixedCharge + extraCharges;
+
+        // Add toll, guide fee, and additional charges
+        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+
         document.getElementById('tot_charge').value = totalCharge.toFixed(2);
+        calculateBalance();
     }
 
-    // Function to calculate balance
+    // Calculate balance
     function calculateBalance() {
-        var totalCharge = parseFloat(document.getElementById('tot_charge').value);
-        var advance = parseFloat(document.getElementById('advance').value);
+        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+        var advance = parseFloat(document.getElementById('advance').value) || 0;
         var balance = totalCharge - advance;
         document.getElementById('balance').value = balance.toFixed(2);
     }
 
-    document.getElementById('fixed_charge').addEventListener('input', calculateTotalCharge);
-    document.getElementById('max_km').addEventListener('input', calculateTotalCharge);
-    document.getElementById('extra_charge').addEventListener('input', calculateTotalCharge);
-    document.getElementById('start_km').addEventListener('input', calculateTotalCharge);
-    document.getElementById('end_km').addEventListener('input', calculateTotalCharge);
-    document.getElementById('toll').addEventListener('input', calculateTotalCharge);
-    document.getElementById('guidefee').addEventListener('input', calculateTotalCharge);
-    document.getElementById('add_charges').addEventListener('input', calculateTotalCharge);
-    document.getElementById('tot_charge').addEventListener('input', calculateBalance);
-    document.getElementById('advance').addEventListener('input', calculateBalance);
+    // Add event listeners to initial input fields
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculateTotalCharge);
+    });
+
+    // Initial calculation
+    calculateTotalCharge();
+});
 </script>
 
 
