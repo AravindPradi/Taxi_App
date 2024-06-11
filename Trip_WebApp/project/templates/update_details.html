@@ -42,13 +42,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-7">
-            {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
+            
             <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733; border-color: white; border-radius: 18px; border-width: 3px;">
                 <div class="card-body" style="color: white;">
                     <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
@@ -66,7 +60,7 @@
                                     <label class="form-check-label" for="hour">Hours</label>
                                 </div>
                             </div>
-                            <button class="btn btn-primary previous-trip" type="button">Get last Trip</button>
+                            <button class="btn btn-primary previous-trip" type="button" id="getLastTripBtn">Get last Trip</button>
                         </div>
                     
                         <div class="mb-3 row">
@@ -94,7 +88,7 @@
                                 <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" value="" aria-required="true" required >
                             </div>
                             <div class="col">
-                                <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" value="" aria-required="true" >
+                                <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" value="20" aria-required="true" >
                             </div>
                         </div>
                     
@@ -218,6 +212,56 @@
 <script>
 
 
+document.addEventListener('DOMContentLoaded', function () {
+    // Existing JavaScript for form validation and handling
+
+    document.getElementById('getLastTripBtn').addEventListener('click', function() {
+        fetch('{% url "get_last_trip_details" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    const messageContainer = document.getElementById('message-container');
+                    messageContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    // Populate the form with the last trip data
+                    document.getElementsByName('trip_no')[0].value = data.trip_no;
+                    document.getElementsByName('date')[0].value = data.date;
+                    document.getElementsByName('vehicle_name')[0].value = data.vehicle_name;
+                    document.getElementsByName('vehicle_number')[0].value = data.vehicle_number;
+                    document.getElementsByName('fixed_charge')[0].value = data.fixed_charge;
+                    document.getElementsByName('max_km')[0].value = data.max_km;
+                    document.getElementsByName('extra_charge')[0].value = data.extra_charge;
+                    document.getElementsByName('driver_name')[0].value = data.driver_name;
+                    document.getElementsByName('guest_name')[0].value = data.guest_name;
+                    document.getElementsByName('start_km')[0].value = data.start_km;
+                    document.getElementsByName('end_km')[0].value = data.end_km;
+                    document.getElementsByName('strt_place')[0].value = data.strt_place;
+                    document.getElementsByName('time')[0].value = data.time;
+                    document.getElementsByName('destination')[0].value = data.destination;
+                    document.getElementsByName('time_arrival')[0].value = data.time_arrival;
+                    document.getElementsByName('arrival_date')[0].value = data.arrival_date;
+                    document.getElementsByName('trip_days')[0].value = data.trip_days;
+                    document.getElementsByName('toll')[0].value = data.toll;
+                    document.getElementsByName('guidefee')[0].value = data.guidefee;
+                    document.getElementsByName('add_charges')[0].value = data.add_charges;
+                    document.getElementsByName('tot_charge')[0].value = data.tot_charge;
+                    document.getElementsByName('advance')[0].value = data.advance;
+                    document.getElementsByName('balance')[0].value = data.balance;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching last trip details:', error);
+            });
+    });
+});
+
+
+
+
+
+
+
+
 
 document.getElementById('update-trip').addEventListener('click', function() {
     const tripData = {
@@ -272,16 +316,7 @@ document.getElementById('update-trip').addEventListener('click', function() {
 
 
 
-
-
-
-
-
-
-
-
-
-
+//function to fetch last trip details
 
 async function getLastTripDetails() {
     try {
@@ -321,22 +356,6 @@ async function getLastTripDetails() {
 }
 
 document.querySelector('.previous-trip').addEventListener('click', getLastTripDetails);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 document.addEventListener("DOMContentLoaded", function() {

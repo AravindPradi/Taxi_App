@@ -12,6 +12,7 @@ from django.utils.dateparse import parse_date
 from django.db.models import Max
 import logging
 
+
 def home(request):
     return render(request,'home.html')
 
@@ -51,7 +52,7 @@ def register(request):
         UserProfile.objects.create(user=user, mobile=mobile)
 
         messages.success(request, f'Account created for {username}!')
-        return redirect('register')  
+        return redirect('login')  
 
     return render(request, 'register.html')
 
@@ -103,7 +104,7 @@ def add_trip_details(request):
 
     fixed_charge = request.POST.get('fixed_charge')
     try:
-        fixed_charge = float(fixed_charge)
+        fixed_charge = fixed_charge
     except ValueError:
         print('Invalid fixed charge amount')
         messages.error(request, 'Invalid fixed charge amount.')
@@ -296,34 +297,39 @@ def delete_trip(request,id):
 
 
 def get_last_trip_details(request):
-    latest_trip = Trip.objects.latest('trip_no')
-    trip_data = {
-        'trip_no':latest_trip.trip_no,
-        'date':latest_trip.date,
-        'vehicle_name':latest_trip.vehicle_name,
-        'vehicle_number':latest_trip.vehicle_number,
-        'fixed_charge':latest_trip.fixed_charge,
-        'max_km': latest_trip.max_km,
-        'extra_charge': latest_trip.extra_charge,
-        'driver_name': latest_trip.driver_name,
-        'guest_name': latest_trip.guest_name,
-        'start_km': latest_trip.start_km,
-        'end_km': latest_trip.end_km,
-        'strt_place': latest_trip.strt_place,
-        'time': latest_trip.time,
-        'destination': latest_trip.destination,
-        'time_arrival': latest_trip.time_arrival,
-        'arrival_date': latest_trip.arrival_date,
-        'trip_days': latest_trip.trip_days,
-        'toll': latest_trip.toll,
-        'guidefee': latest_trip.guidefee,
-        'add_charges': latest_trip.add_charges,
-        'tot_charge': latest_trip.tot_charge,
-        'advance': latest_trip.advance,
-        'balance': latest_trip.balance,
-    }
-    
-    return JsonResponse(trip_data)
+    try:
+        latest_trip = Trip.objects.latest('trip_no')
+        trip_data = {
+            'trip_no': latest_trip.trip_no,
+            'date': latest_trip.date,
+            'vehicle_name': latest_trip.vehicle_name,
+            'vehicle_number': latest_trip.vehicle_number,
+            'fixed_charge': latest_trip.fixed_charge,
+            'max_km': latest_trip.max_km,
+            'extra_charge': latest_trip.extra_charge,
+            'driver_name': latest_trip.driver_name,
+            'guest_name': latest_trip.guest_name,
+            'start_km': latest_trip.start_km,
+            'end_km': latest_trip.end_km,
+            'strt_place': latest_trip.strt_place,
+            'time': latest_trip.time,
+            'destination': latest_trip.destination,
+            'time_arrival': latest_trip.time_arrival,
+            'arrival_date': latest_trip.arrival_date,
+            'trip_days': latest_trip.trip_days,
+            'toll': latest_trip.toll,
+            'guidefee': latest_trip.guidefee,
+            'add_charges': latest_trip.add_charges,
+            'tot_charge': latest_trip.tot_charge,
+            'advance': latest_trip.advance,
+            'balance': latest_trip.balance,
+        }
+        return JsonResponse(trip_data)
+    except Trip.DoesNotExist:
+        response_data = {
+            'error': 'No trips found in the database.'
+        }
+        return JsonResponse(response_data, status=404)
 
 
 
