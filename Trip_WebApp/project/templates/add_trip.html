@@ -21,6 +21,69 @@
         .hidden {
             display: none;
         }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .switch-label {
+            margin: 0 10px;
+            font-size: 16px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #626262;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #626262;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
     </style>
 </head>
 <body>
@@ -46,198 +109,206 @@
         <div class="row justify-content-center">
             <div class="col-md-7">
             
-                <ul>
-                    {% for message in messages %}
-                        <li class="{{ message.tags }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
+                <div class="container">
+                    {% if messages %}
+                        {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             
                 <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733; border-color: white; border-radius: 18px; border-width: 3px;">
                     <div class="card-body" style="color: white;">
                         <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                         <p>Add your trip details here..</p><br>
 
-                        <form id="tripForm" class="needs-validation" novalidate method="post" action="{% url 'add_trip_details' %}">
+                        <form id="tripForm" method="post" action="{% url 'add_trip_details' %}">
                             {% csrf_token %}
-
                             <div class="mb-3 d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="trip_type" id="km" value="km" required>
-                                        <label class="form-check-label" for="km">Kilometers</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="trip_type" id="hour" value="hour" required>
-                                        <label class="form-check-label" for="hour">Hours</label>
+                                    <div class="switch-container">
+                                        <span class="switch-label">Km</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="trip_type" name="trip_type" value="km">
+                                            <span class="slider"></span>
+                                        </label>
+                                        <span class="switch-label">Hours</span>
                                     </div>
                                     <div class="invalid-feedback">Trip type is required</div>
                                 </div>
                                 <a href="{% url 'update_last_trip' %}" class="btn btn-outline-secondary">Get Last Trip</a>
                             </div>
-
+                            
                             <div class="mb-3 row">
                                 <div class="col">
                                     <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
                                     <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="date" name="date" aria-required="true" required>
+                                    <input class="form-control" type="date" name="date" required>
                                     <div class="valid-feedback">Date field is valid!</div>
                                     <div class="invalid-feedback">Date is required</div>
                                 </div>
                             </div>
-
+                            
                             <div class="mb-3">
-                                <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" aria-required="true" required>
+                                <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" required>
                                 <div class="valid-feedback">Vehicle number is valid!</div>
                                 <div class="invalid-feedback">Vehicle number is required</div>
                             </div>
-
+                            
                             <div class="mb-3">
-                                <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" aria-required="true" required>
+                                <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" required>
                                 <div class="valid-feedback">Vehicle name is valid!</div>
                                 <div class="invalid-feedback">Vehicle name is required</div>
                             </div>
-
+                            
                             <div class="mb-3">
-                                <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" aria-required="true" required>
+                                <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" required>
                                 <div class="valid-feedback">Driver name is valid!</div>
                                 <div class="invalid-feedback">Driver name is required</div>
                             </div>
-
+                            
                             <div class="mb-3">
-                                <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" aria-required="true" required>
+                                <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" required>
                                 <div class="valid-feedback">Guest name is valid!</div>
                                 <div class="invalid-feedback">Guest name is required</div>
                             </div>
-
+                            
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="text" name="strt_place" placeholder="Starting Place*" required>
+                                    <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required >
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" >
+                                </div>
+                            </div>
+    
+                            <div class="mb-3">
+                                <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" >
+                            </div>
+                            
+                        
+                            
+                            <div class="mb-3 row" id="kilometerFields">
+                                <div class="col">
+                                    <input class="form-control" type="number" id="strt_km" name="strt_km" placeholder="Starting Kilometer" required>
+                                    <div class="valid-feedback">Starting kilometer is valid!</div>
+                                    <div class="invalid-feedback">Starting kilometer is required</div>
+                                </div>
+                                <div class="col">
+                                    <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer" >
+                                    <div class="valid-feedback">Ending kilometer is valid!</div>
+                                    <div class="invalid-feedback">Ending kilometer is required</div>
+                                </div>
+                            </div>
+                            
+                            <form id="rideForm">
+                                <div class="mb-3 row" id="hourFields">
+                                    <div class="text-center mt-1">
+                                        <p>Ride Hour</p>
+                                        <hr>
+                                    </div>
+                                    <div class="col">
+                                        <label for="strt_time">Start*</label>
+                                        <input class="form-control" type="time" id="strt_time" name="strt_time" placeholder="Starting Time" required>
+                                        <div class="valid-feedback">Starting time is valid!</div>
+                                        <div class="invalid-feedback">Starting time is required</div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="end_time">End*</label>
+                                        <input class="form-control" type="datetime-local" id="end_time" name="end_time" placeholder="Ending Time" required>
+                                        <div class="valid-feedback">Ending time is valid!</div>
+                                        <div class="invalid-feedback">Ending time is required</div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="ride_hours">Hours</label>
+                                        <input class="form-control" type="text" id="ride_hours" name="ride_hours" placeholder="Ride Hours" readonly>
+                                    </div>
+                                </div>
+                            </form>
+                            
+                            <div class="mb-3 row">
+                                <div class="col">
+                                    <label for="strt_place">Starting Place*</label>
+                                    <input class="form-control" type="text" id="strt_place" name="strt_place" placeholder="Starting Place*" required>
                                     <div class="valid-feedback">Starting place is valid!</div>
                                     <div class="invalid-feedback">Starting place is required</div>
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="time" name="time" placeholder="Time*" required>
+                                    <label for="time">Time*</label>
+                                    <input class="form-control" type="time" id="time" name="time" placeholder="Time*" required>
                                     <div class="valid-feedback">Time is valid!</div>
                                     <div class="invalid-feedback">Time is required</div>
                                 </div>
                             </div>
-
+                            
                             <div class="mb-3 row">
                                 <div class="col">
-                                    <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required>
-                                    <div class="valid-feedback">Fixed charge is valid!</div>
-                                    <div class="invalid-feedback">Fixed charge is required</div>
+                                    <label for="destination">Destination</label>
+                                    <input class="form-control" type="text" id="destination" name="destination" placeholder="Destination*">
+                                    <div class="valid-feedback">Destination is valid!</div>
+                                    <div class="invalid-feedback">Destination is required</div>
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" required>
-                                    <div class="valid-feedback">Max kilometer is valid!</div>
-                                    <div class="invalid-feedback">Max kilometer is required</div>
+                                    <label for="time_arrival">Time of Arrival</label>
+                                    <input class="form-control" type="time" id="time_arrival" name="time_arrival" placeholder="Time of Arrival*">
+                                    <div class="valid-feedback">Time of arrival is valid!</div>
+                                    <div class="invalid-feedback">Time of arrival is required</div>
                                 </div>
                             </div>
-
-                            <div class="mb-3">
-                                <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" required>
-                                <div class="valid-feedback">Extra charge per km is valid!</div>
-                                <div class="invalid-feedback">Extra charge per km is required</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <input class="form-control" type="number" id="extra_charge_hour" name="extra_charge_hour" placeholder="Extra charge per hour*" aria-required="true" required>
-                                <div class="valid-feedback">Extra charge per hour is valid!</div>
-                                <div class="invalid-feedback">Extra charge per hour is required</div>
-                            </div>
-    
-                            <div class="mb-3">
-                                <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" aria-required="true">
-                            </div>
-    
-                            <div class="mb-3">
-                                <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" aria-required="true">
-                            </div>
-    
-                            <div id="kilometers-fields">
-                                <div class="mb-3 row">
-                                    <div class="col">
-                                        <input class="form-control" type="number" id="start_km" name="start_km" placeholder="Starting Kilometer*" >
-                                    </div>
-                                    <div class="col">
-                                        <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer*" >
-                                    </div>
-                                </div>
-                            </div>
-    
-                            <div id="hours-fields" class="hidden">
-                                <div class="mb-3 row">
-                                    <div class="col">
-                                        <input class="form-control" type="datetime-local" name="start_hour" placeholder="Starting Hour*">
-                                    </div>
-                                    <div class="col">
-                                        <input class="form-control" type="datetime-local" name="end_hour" placeholder="Ending Hour*">
-                                    </div>
-                                </div>
-                            </div>
-    
+                            
                             <div class="mb-3 row">
-                                <div class="col">
-                                    <input class="form-control" type="text" name="strt_place" placeholder="Starting Place*" >
+                                <div class="col-6">
+                                    <label for="arrival_date">Arrival Date</label>
+                                    <input class="form-control" type="date" id="arrival_date" name="arrival_date" placeholder="Arrival date*" >
+                                    <div class="valid-feedback">Arrival date is valid!</div>
+                                    <div class="invalid-feedback">Arrival date is required</div>
                                 </div>
-                                <div class="col">
-                                    <input class="form-control" type="time" name="time" placeholder="Time*">
-                                </div>
-                            </div>
-    
-                            <div class="mb-3 row">
-                                <div class="col">
-                                    <input class="form-control" type="text" name="destination" placeholder="Destination*">
-                                </div>
-                                <div class="col">
-                                    <input class="form-control" type="time" name="time_arrival" placeholder="Time of Arrival*">
+                                <div class="col-6">
+                                    <label for="trip_days">Trip Days*</label>
+                                    <input class="form-control" type="number" id="trip_days" name="trip_days" placeholder="No of days*" readonly>
+                                    <div class="valid-feedback">Number of days is valid!</div>
+                                    <div class="invalid-feedback">Number of days is required</div>
                                 </div>
                             </div>
-    
-                            <div class="mb-3">
-                                <p>Trip end date*</p>
-                                <input class="form-control" type="date" name="arrival_date" placeholder="Arrival date*" >
-                            </div>
-    
-                            <div class="mb-3">
-                                <p></p>
-                                <input class="form-control" type="number" name="trip_days" placeholder="No of days*" >
-                            </div>
-    
+                            
+                            <hr>
+                            
                             <div class="mb-3">
                                 <p>Additional charges*</p>
                                 <div id="inputContainer">
+                                    <label for="toll">Toll*</label>
                                     <div class="input-group mb-2">
-                                        <input class="form-control" type="number" name="toll" value="0" placeholder="Toll*" >
+                                        <input class="form-control" type="number" name="toll" value="0" placeholder="Toll*">
                                     </div>
                                 </div>
                                 <button class="btn btn-light add-btn mt-2" type="button">Toll +</button>
                             </div>
+                            
                             <hr style="height: 3px;">
-    
+                            
                             <div class="mb-3">
                                 <div id="inputContainer1">
+                                    <label for="">Guide Fee*</label>
                                     <div class="input-group mb-2">
-                                        <input class="form-control" type="number" value="0" name="guidefee" placeholder="Guide Fee*" >
+                                        <input class="form-control" type="number" value="0" name="guidefee" placeholder="Guide Fee*">
                                     </div>
                                 </div>
                                 <button class="btn btn-light add-btn2 mt-2" type="button">Fee +</button>
                             </div>
-    
+                            
                             <div class="mb-3">
-                                <p>Additional charges</p>
                                 <div id="inputContainer2">
+                                    <label for="add_charges">Extra expenses*</label>
                                     <div class="input-group mb-2">
-                                        <input class="form-control" type="number" value="0" name="add_charges" placeholder="Additional charges*" >
+                                        <input class="form-control" type="number" value="0" name="add_charges" placeholder="Extra expenses*">
                                     </div>
                                 </div>
                                 <button class="btn btn-light add-btn3 mt-2" type="button">Add +</button>
                             </div>
+                            
                             <hr style="height: 3px;">
-    
                             <div class="mb-3">
                                 <h5 class="text-center">Payment details</h5>
                                 <input class="form-control" type="number" id="tot_charge" name="tot_charge" placeholder="Total Charge*" >
@@ -250,7 +321,6 @@
                             <div class="mb-3">
                                 <input class="form-control" type="number" id="balance" name="balance" placeholder="Balance amount*" >
                             </div>
-    
                             <div class="mb-3">
                                 <button class="btn btn-primary" type="submit">Submit Trip Details</button>
                             </div>
@@ -265,132 +335,144 @@
 <script>
 
 
-(function () {
-            'use strict';
-            var forms = document.querySelectorAll('.needs-validation');
-            Array.prototype.slice.call(forms)
-                .forEach(function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-        })();
+// Ride Hours
 
+document.getElementById('strt_time').addEventListener('change', calculateRideHours);
+    document.getElementById('end_time').addEventListener('change', calculateRideHours);
 
+    function calculateRideHours() {
+        const startTime = document.getElementById('strt_time').value;
+        const endTime = document.getElementById('end_time').value;
 
+        if (startTime && endTime) {
+            const start = new Date(startTime);
+            const end = new Date(endTime);
 
-        document.addEventListener('DOMContentLoaded', function () {
-    // Existing JavaScript for form validation and handling
-
-    document.getElementById('getLastTripBtn').addEventListener('click', function() {
-        fetch('{% url "get_last_trip_details" %}')
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    const messageContainer = document.getElementById('message-container');
-                    messageContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                } else {
-                    // Populate the form with the last trip data
-                    document.getElementsByName('trip_no')[0].value = data.trip_no;
-                    document.getElementsByName('date')[0].value = data.date;
-                    document.getElementsByName('vehicle_name')[0].value = data.vehicle_name;
-                    document.getElementsByName('vehicle_number')[0].value = data.vehicle_number;
-                    document.getElementsByName('fixed_charge')[0].value = data.fixed_charge;
-                    document.getElementsByName('max_km')[0].value = data.max_km;
-                    document.getElementsByName('extra_charge')[0].value = data.extra_charge;
-                    document.getElementsByName('driver_name')[0].value = data.driver_name;
-                    document.getElementsByName('guest_name')[0].value = data.guest_name;
-                    document.getElementsByName('start_km')[0].value = data.start_km;
-                    document.getElementsByName('end_km')[0].value = data.end_km;
-                    document.getElementsByName('strt_place')[0].value = data.strt_place;
-                    document.getElementsByName('time')[0].value = data.time;
-                    document.getElementsByName('destination')[0].value = data.destination;
-                    document.getElementsByName('time_arrival')[0].value = data.time_arrival;
-                    document.getElementsByName('arrival_date')[0].value = data.arrival_date;
-                    document.getElementsByName('trip_days')[0].value = data.trip_days;
-                    document.getElementsByName('toll')[0].value = data.toll;
-                    document.getElementsByName('guidefee')[0].value = data.guidefee;
-                    document.getElementsByName('add_charges')[0].value = data.add_charges;
-                    document.getElementsByName('tot_charge')[0].value = data.tot_charge;
-                    document.getElementsByName('advance')[0].value = data.advance;
-                    document.getElementsByName('balance')[0].value = data.balance;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching last trip details:', error);
-            });
-    });
-});
+            if (end > start) {
+                const diff = (end - start) / (1000 * 60 * 60); // difference in hours
+                document.getElementById('ride_hours').value = diff.toFixed(2); // display with two decimal places
+            } else {
+                document.getElementById('ride_hours').value = 'Invalid time range';
+            }
+        }
+    }
 
 
 
 
 
+    $(document).ready(function() {
+        function toggleFields() {
+            if ($('#trip_type').is(':checked')) {
+                $('#kilometerFields').hide();
+                $('#hourFields').show();
 
+                // Adjust required attributes
+                $('#strt_km').removeAttr('');
+                $('#trip_duration').attr('required', 'required');
+            } else {
+                $('#kilometerFields').show();
+                $('#hourFields').hide();
 
+                // Adjust required attributes
+                $('#strt_km').attr('required');
+                $('#trip_duration').removeAttr('required');
+            }
+        }
+        // Initial toggle state
+        toggleFields();
 
+        // Event listener for the checkbox
+        $('#trip_type').change(toggleFields);
 
-
-
-document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('tripForm');
-            const kmFields = document.getElementById('kilometers-fields');
-            const hourFields = document.getElementById('hours-fields');
-            const kmRadio = document.getElementById('km');
-            const hourRadio = document.getElementById('hour');
-
-            kmRadio.addEventListener('change', function () {
-                kmFields.classList.remove('hidden');
-                hourFields.classList.add('hidden');
-            });
-
-            hourRadio.addEventListener('change', function () {
-                hourFields.classList.remove('hidden');
-                kmFields.classList.add('hidden');
-            });
-
-
-
-
-
-            // Bootstrap's custom validation style
-            (function () {
-                'use strict'
-                var forms = document.querySelectorAll('.needs-validation')
-                Array.prototype.slice.call(forms)
-                    .forEach(function (form) {
-                        form.addEventListener('submit', function (event) {
-                            if (!form.checkValidity()) {
-                                event.preventDefault()
-                                event.stopPropagation()
-                            }
-                            form.classList.add('was-validated')
-                        }, false)
-                    })
-            })()
-        });
-
-
-
-
+        // Custom Bootstrap validation
         (function () {
-            'use strict';
-            var forms = document.querySelectorAll('.needs-validation');
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
             Array.prototype.slice.call(forms)
                 .forEach(function (form) {
                     form.addEventListener('submit', function (event) {
                         if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
+                            event.preventDefault()
+                            event.stopPropagation()
                         }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
+                        form.classList.add('was-validated')
+                    }, false)
+                })
         })();
+    });
+
+
+// (function () {
+//             'use strict';
+//             var forms = document.querySelectorAll('.needs-validation');
+//             Array.prototype.slice.call(forms)
+//                 .forEach(function (form) {
+//                     form.addEventListener('submit', function (event) {
+//                         if (!form.checkValidity()) {
+//                             event.preventDefault();
+//                             event.stopPropagation();
+//                         }
+//                         form.classList.add('was-validated');
+//                     }, false);
+//                 });
+//         })();
+
+
+
+
+//     document.addEventListener('DOMContentLoaded', function () {
+//     // Existing JavaScript for form validation and handling
+
+//     document.getElementById('getLastTripBtn').addEventListener('click', function() {
+//         fetch('{% url "get_last_trip_details" %}')
+//             .then(response => response.json())
+//             .then(data => {
+//                 if (data.error) {
+//                     const messageContainer = document.getElementById('message-container');
+//                     messageContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+//                 } else {
+//                     // Populate the form with the last trip data
+//                     document.getElementsByName('trip_no')[0].value = data.trip_no;
+//                     document.getElementsByName('date')[0].value = data.date;
+//                     document.getElementsByName('vehicle_name')[0].value = data.vehicle_name;
+//                     document.getElementsByName('vehicle_number')[0].value = data.vehicle_number;
+//                     document.getElementsByName('fixed_charge')[0].value = data.fixed_charge;
+//                     document.getElementsByName('max_km')[0].value = data.max_km;
+//                     document.getElementsByName('extra_charge')[0].value = data.extra_charge;
+//                     document.getElementsByName('driver_name')[0].value = data.driver_name;
+//                     document.getElementsByName('guest_name')[0].value = data.guest_name;
+//                     document.getElementsByName('start_km')[0].value = data.start_km;
+//                     document.getElementsByName('end_km')[0].value = data.end_km;
+//                     document.getElementsByName('strt_place')[0].value = data.strt_place;
+//                     document.getElementsByName('time')[0].value = data.time;
+//                     document.getElementsByName('destination')[0].value = data.destination;
+//                     document.getElementsByName('time_arrival')[0].value = data.time_arrival;
+//                     document.getElementsByName('arrival_date')[0].value = data.arrival_date;
+//                     document.getElementsByName('trip_days')[0].value = data.trip_days;
+//                     document.getElementsByName('toll')[0].value = data.toll;
+//                     document.getElementsByName('guidefee')[0].value = data.guidefee;
+//                     document.getElementsByName('add_charges')[0].value = data.add_charges;
+//                     document.getElementsByName('tot_charge')[0].value = data.tot_charge;
+//                     document.getElementsByName('advance')[0].value = data.advance;
+//                     document.getElementsByName('balance')[0].value = data.balance;
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error('Error fetching last trip details:', error);
+//             });
+//     });
+// });
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -452,7 +534,7 @@ document.addEventListener("DOMContentLoaded", function() {
             addInputField("inputContainer1", "guidefee", "Guide Fee*");
         }
         if (event.target.classList.contains("add-btn3")) {
-            addInputField("inputContainer2", "add_charges", "Additional charges*");
+            addInputField("inputContainer2", "add_charges", "Extra expenses*");
         }
         if (event.target.classList.contains("remove-btn")) {
             removeInputField(event);
@@ -463,42 +545,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var tripNumber = document.getElementById('trip_no_hidden').value;
     document.getElementById('trip_no_display').value = tripNumber;
 
-    // Show/hide kilometers and hours fields based on selected trip type
-    const kmRadioButton = document.getElementById('km');
-    const hourRadioButton = document.getElementById('hour');
-    const kilometersFields = document.getElementById('kilometers-fields');
-    const hoursFields = document.getElementById('hours-fields');
-
-    kmRadioButton.addEventListener('change', function() {
-        if (this.checked) {
-            kilometersFields.classList.remove('hidden');
-            hoursFields.classList.add('hidden');
-        }
-    });
-
-    hourRadioButton.addEventListener('change', function() {
-        if (this.checked) {
-            hoursFields.classList.remove('hidden');
-            kilometersFields.classList.add('hidden');
-        }
-    });
-
-    if (kmRadioButton.checked) {
-        kilometersFields.classList.remove('hidden');
-        hoursFields.classList.add('hidden');
-    } else if (hourRadioButton.checked) {
-        hoursFields.classList.remove('hidden');
-        kilometersFields.classList.add('hidden');
-    } else {
-        kilometersFields.classList.add('hidden');
-        hoursFields.classList.add('hidden');
-    }
-
+    
     function calculateTotalCharge() {
         var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
         var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
         var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
-        var startKm = parseFloat(document.getElementById('start_km').value) || 0;
+        var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
         var endKm = parseFloat(document.getElementById('end_km').value) || 0;
 
         // Calculate total kilometers traveled

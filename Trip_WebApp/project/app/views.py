@@ -92,178 +92,124 @@ def add_trip(request):
 
 
 
-logger = logging.getLogger(__name__)
+from django.urls import reverse
+from django.contrib import messages
+from .models import Trip
+from django.views.decorators.csrf import csrf_protect
+from django.utils.dateparse import parse_date, parse_time
+from datetime import datetime
 
+
+@csrf_protect
 def add_trip_details(request):
-    logger.debug(request.POST)
-    trip_no = request.POST.get('trip_no')  
-    trip_type = request.POST.get('trip_type')
-    date = request.POST.get('date')
-    vehicle_number = request.POST.get('vehicle_number')
-    vehicle_name = request.POST.get('vehicle_name')
-
-    fixed_charge = request.POST.get('fixed_charge')
-    try:
-        fixed_charge = fixed_charge
-    except ValueError:
-        print('Invalid fixed charge amount')
-        messages.error(request, 'Invalid fixed charge amount.')
-        return redirect('add_trip_details')  
-
-    max_km = request.POST.get('max_km')
-    if trip_type == 'km' and max_km:
-        try:
-            max_km = int(max_km)
-            if max_km <= 0:
-                messages.error(request, 'Max kilometer cannot be negative or zero.')
-                return redirect('add_trip')  
-        except ValueError:
-                print('Invalid max km value')
-                messages.error(request, 'Invalid max kilometer value.')
-                return redirect('add_trip_details')  
-        else:
-            max_km = None  
-
-        extra_charge = request.POST.get('extra_charge')
-        try:
-            extra_charge = float(extra_charge)
-        except ValueError:
-            print('Invalid extra charge amount')
-            messages.error(request, 'Invalid extra charge amount.')
-            return redirect('add_trip_details')  
-
+    if request.method == 'POST':
+        trip_no = request.POST.get('trip_no')
+        date = request.POST.get('date')
+        vehicle_number = request.POST.get('vehicle_number')
+        vehicle_name = request.POST.get('vehicle_name')
         driver_name = request.POST.get('driver_name')
         guest_name = request.POST.get('guest_name')
-
-        start_km = None
-        end_km = None
-        start_hour = None
-        end_hour = None
-
-        if trip_type == 'km':
-            start_km = request.POST.get('start_km')
-            if start_km:
-                try:
-                    start_km = int(start_km)
-                    if start_km < 0:
-                        messages.error(request, 'Starting kilometer cannot be negative.')
-                        return redirect('add_trip')  
-                except ValueError:
-                    print('Invalid starting km value')
-                    messages.error(request, 'Invalid starting kilometer value.')
-                    return redirect('add_trip')  
-
-            end_km = request.POST.get('end_km')
-            if end_km:
-                try:
-                    end_km = int(end_km)
-                    if end_km < start_km:
-                        messages.error(request, 'Ending kilometer cannot be less than starting kilometer.')
-                        return redirect('add_trip')  
-                except ValueError:
-                    print('Invlaid ending km value')
-                    messages.error(request, 'Invalid ending kilometer value.')
-                    return redirect('add_trip')  
-        else:
-            start_hour = request.POST.get('start_hour')  
-            end_hour = request.POST.get('end_hour')  
-
+        fixed_charge = request.POST.get('fixed_charge')
+        max_km = request.POST.get('max_km')
+        extra_charge = request.POST.get('extra_charge')
+        strt_km = request.POST.get('strt_km')
+        end_km = request.POST.get('end_km')
+        strt_time = request.POST.get('strt_time')
+        end_time = request.POST.get('end_time')
         strt_place = request.POST.get('strt_place')
-        time = request.POST.get('time')  
+        time = request.POST.get('time')
         destination = request.POST.get('destination')
-        time_arrival = request.POST.get('time_arrival')  
+        time_arrival = request.POST.get('time_arrival')
         arrival_date = request.POST.get('arrival_date')
-
         trip_days = request.POST.get('trip_days')
-        try:
-            trip_days = int(trip_days)
-            if trip_days <= 0:
-                messages.error(request, 'Number of days cannot be negative or zero.')
-                return redirect('add_trip')  
-        except ValueError:
-            print('Invalid no of days')
-            messages.error(request, 'Invalid number of days.')
-            return redirect('add_trip')  
-
         toll = request.POST.get('toll')
-        try:
-            toll = float(toll)
-        except ValueError:
-            print('invalid toll amount')
-            messages.error(request, 'Invalid toll amount.')
-            return redirect('add_trip')  
-
         guidefee = request.POST.get('guidefee')
-        try:
-            guidefee = float(guidefee)
-        except ValueError:
-            print('invalid guide fee')
-            messages.error(request, 'Invalid guide fee amount.')
-            return redirect('add_trip')  
-
         add_charges = request.POST.get('add_charges')
-        try:
-            add_charges = float(add_charges)
-        except ValueError:
-            print('Invalid additional charges amount')
-            messages.error(request, 'Invalid additional charges amount.')
-            return redirect('add_trip')  
-
         tot_charge = request.POST.get('tot_charge')
-        try:
-            tot_charge = float(tot_charge)
-        except ValueError:
-            print('Invalid total charge amount')
-            messages.error(request, 'Invalid total charge amount.')
-            return redirect('add_trip')  
-
         advance = request.POST.get('advance')
-        try:
-            advance = float(advance)
-        except ValueError:
-            print('Invalid advance amount')
-            messages.error(request, 'Invalid advance amount.')
-            return redirect('add_trip')  
+        balance = request.POST.get('balance')
+
+        errors = []
+
+        if not trip_no:
+            errors.append("Trip number is required")
+        if not date:
+            errors.append("Date is required")
+        if not vehicle_number:
+            errors.append("Vehicle number is required")
+        if not vehicle_name:
+            errors.append("Vehicle name is required")
+        if not driver_name:
+            errors.append("Driver name is required")
+        if not guest_name:
+            errors.append("Guest name is required")
+        if not fixed_charge:
+            errors.append("Fixed charge is required")
+        if not max_km:
+            errors.append("Max kilometer is required")
+        if not extra_charge:
+            errors.append("Extra charge per km/hour is required")
+        if not strt_place:
+            errors.append("Starting place is required")
+        if not time:
+            errors.append("Time is required")
+        if not arrival_date:
+            errors.append("Arrival date is required")
+        if not trip_days:
+            errors.append("Trip days is required")
+        if not tot_charge:
+            errors.append("Total charge is required")
+        if not balance:
+            errors.append("Balance amount is required")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return redirect(reverse('add_trip_details'))
 
         try:
-            new_trip = Trip.objects.create(
+            trip = Trip(
                 trip_no=trip_no,
-                trip_type=trip_type,
-                date=date,
+                date=parse_date(date),
                 vehicle_number=vehicle_number,
                 vehicle_name=vehicle_name,
+                driver_name=driver_name,
+                guest_name=guest_name,
                 fixed_charge=fixed_charge,
                 max_km=max_km,
                 extra_charge=extra_charge,
-                driver_name=driver_name,
-                guest_name=guest_name,
-                start_km=start_km,
-                end_km=end_km,
-                start_hour=start_hour,
-                end_hour=end_hour,
+                strt_km=int(strt_km) if strt_km else None,
+                end_km=int(end_km) if end_km else None,
+                strt_time=parse_time(strt_time) if strt_time else None,
+                end_time=parse_time(end_time) if end_time else None,
+                ride_hours=((datetime.combine(datetime.min, parse_time(end_time)) - datetime.combine(datetime.min, parse_time(strt_time))).total_seconds() / 3600) if strt_time and end_time else None,
                 strt_place=strt_place,
-                time=time,
+                time=parse_time(time),
                 destination=destination,
-                time_arrival=time_arrival,
-                arrival_date=arrival_date,
-                trip_days=trip_days,
-                toll=toll,
-                guidefee=guidefee,
-                add_charges=add_charges,
-                tot_charge=tot_charge,
-                advance=advance,
+                time_arrival=parse_time(time_arrival),
+                arrival_date=parse_date(arrival_date),
+                trip_days=int(trip_days),
+                toll=float(toll) if toll else 0,
+                guidefee=float(guidefee) if guidefee else 0,
+                add_charges=float(add_charges) if add_charges else 0,
+                tot_charge=float(tot_charge),
+                advance=float(advance) if advance else 0,
+                balance=float(balance)
             )
-            new_trip.save()
-            
-            messages.success(request, f'Trip #{trip_no} added successfully!')
-            return redirect('add_trip') 
+            trip.save()
+            messages.success(request, "Trip details added successfully!")
+            return redirect(reverse('add_trip_details'))
         except Exception as e:
-            print(e)
-            messages.error(request, f'An error occurred: {e}')
-            return redirect('add_trip')  
+            messages.error(request, str(e))
+            return redirect(reverse('add_trip_details'))
 
+    if Trip.objects.exists():
+        latest_trip = Trip.objects.latest('trip_no').trip_no
+        latest_trip_number = f'TR{int(latest_trip[2:]) + 1:03d}'
     else:
-        return redirect('add_trip')
+        latest_trip_number = 'TR001'
+    
+    return render(request, 'add_trip.html', {'latest_trip_number': latest_trip_number})
 
 
 
