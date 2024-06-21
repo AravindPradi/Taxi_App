@@ -10,7 +10,8 @@ from .models import Trip
 from django.views.decorators.http import require_POST
 from django.utils.dateparse import parse_date
 from django.db.models import Max
-import logging
+
+from django.views.decorators.csrf import csrf_exempt
 
 
 def home(request):
@@ -92,13 +93,14 @@ def add_trip(request):
 
 
 
+
+
 from django.urls import reverse
 from django.contrib import messages
 from .models import Trip
 from django.views.decorators.csrf import csrf_protect
 from django.utils.dateparse import parse_date, parse_time
 from datetime import datetime
-
 
 @csrf_protect
 def add_trip_details(request):
@@ -154,9 +156,9 @@ def add_trip_details(request):
         if not time:
             errors.append("Time is required")
         if not arrival_date:
-            errors.append("Arrival date is required")
+            pass
         if not trip_days:
-            errors.append("Trip days is required")
+            pass
         if not tot_charge:
             errors.append("Total charge is required")
         if not balance:
@@ -168,6 +170,7 @@ def add_trip_details(request):
             return redirect(reverse('add_trip_details'))
 
         try:
+            
             trip = Trip(
                 trip_no=trip_no,
                 date=parse_date(date),
@@ -175,9 +178,9 @@ def add_trip_details(request):
                 vehicle_name=vehicle_name,
                 driver_name=driver_name,
                 guest_name=guest_name,
-                fixed_charge=fixed_charge,
-                max_km=max_km,
-                extra_charge=extra_charge,
+                fixed_charge=int(fixed_charge) if fixed_charge else 0,
+                max_km=int(max_km) if max_km else 0,
+                extra_charge=float(extra_charge) if extra_charge else 0,
                 strt_km=int(strt_km) if strt_km else None,
                 end_km=int(end_km) if end_km else None,
                 strt_time=parse_time(strt_time) if strt_time else None,
@@ -188,7 +191,7 @@ def add_trip_details(request):
                 destination=destination,
                 time_arrival=parse_time(time_arrival),
                 arrival_date=parse_date(arrival_date),
-                trip_days=int(trip_days),
+                trip_days=trip_days,
                 toll=float(toll) if toll else 0,
                 guidefee=float(guidefee) if guidefee else 0,
                 add_charges=float(add_charges) if add_charges else 0,
@@ -199,10 +202,14 @@ def add_trip_details(request):
             trip.save()
             messages.success(request, "Trip details added successfully!")
             return redirect(reverse('add_trip_details'))
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect(reverse('add_trip_details'))
         except Exception as e:
             messages.error(request, str(e))
             return redirect(reverse('add_trip_details'))
 
+    # Retrieve latest trip number for display in form
     if Trip.objects.exists():
         latest_trip = Trip.objects.latest('trip_no').trip_no
         latest_trip_number = f'TR{int(latest_trip[2:]) + 1:03d}'
@@ -210,7 +217,6 @@ def add_trip_details(request):
         latest_trip_number = 'TR001'
     
     return render(request, 'add_trip.html', {'latest_trip_number': latest_trip_number})
-
 
 
 
@@ -223,7 +229,7 @@ def all_trip_table(request):
 
 def trip_view(request,id):
     trip = get_object_or_404(Trip,id=id)
-    distance_travelled = trip.end_km - trip.start_km
+    distance_travelled = trip.end_km - trip.strt_km
     context = {'trip':trip,
                'distance_travelled':distance_travelled}
     return render(request,'trip_view.html',context=context)
@@ -241,13 +247,12 @@ def delete_trip(request,id):
     messages.info(request,'{{trip.trip_no}} Deleted successfully')
     return redirect('all_trip_table')
 
-
 def get_last_trip_details(request):
     try:
         latest_trip = Trip.objects.latest('trip_no')
         trip_data = {
             'trip_no': latest_trip.trip_no,
-            'date': latest_trip.date,
+            'date': latest_trip.date.strftime('%Y-%m-%d'),  
             'vehicle_name': latest_trip.vehicle_name,
             'vehicle_number': latest_trip.vehicle_number,
             'fixed_charge': latest_trip.fixed_charge,
@@ -255,13 +260,13 @@ def get_last_trip_details(request):
             'extra_charge': latest_trip.extra_charge,
             'driver_name': latest_trip.driver_name,
             'guest_name': latest_trip.guest_name,
-            'start_km': latest_trip.start_km,
+            'strt_km': latest_trip.strt_km,
             'end_km': latest_trip.end_km,
             'strt_place': latest_trip.strt_place,
-            'time': latest_trip.time,
+            'time': latest_trip.time.strftime('%Y-%m-%dT%H:%M'),  
             'destination': latest_trip.destination,
-            'time_arrival': latest_trip.time_arrival,
-            'arrival_date': latest_trip.arrival_date,
+            'time_arrival': latest_trip.time_arrival.strftime('%H:%M'),  
+            'arrival_date': latest_trip.arrival_date.strftime('%Y-%m-%d'),
             'trip_days': latest_trip.trip_days,
             'toll': latest_trip.toll,
             'guidefee': latest_trip.guidefee,
@@ -270,12 +275,14 @@ def get_last_trip_details(request):
             'advance': latest_trip.advance,
             'balance': latest_trip.balance,
         }
+        print(trip_data)
         return JsonResponse(trip_data)
     except Trip.DoesNotExist:
         response_data = {
             'error': 'No trips found in the database.'
         }
         return JsonResponse(response_data, status=404)
+
 
 
 

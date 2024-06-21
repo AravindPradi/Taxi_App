@@ -256,15 +256,20 @@
               <h4 class="text-center bg-secondary my-2 py-2">Trip Details</h4>
               <div class="row mb-0">
                 <div class="col-8 mb-0">
-                  <p>Starting Km: {{ trip.start_km }}Km</b></p>
-                  <p>Ending Km: {{ trip.end_km }}Km</p>
+                  {% if trip.trip_type == 'km' %}
+                      <p>Starting Km: {{ trip.strt_km }} Km</p>
+                      <p>Ending Km: {{ trip.end_km }} Km</p>
+                  {% elif trip.trip_type == 'hour' %}
+                      <p>Starting Hour: {{ trip.start_hour }}</p>
+                      <p>Ending Hour: {{ trip.end_hour }}</p>
+                  {% endif %}
                   <p>Trip start date: {{ trip.date }}</p>
                   <p>Trip end date: {{ trip.arrival_date }}</p>
                   <p><b>No of days:</b> {{ trip.trip_days }}</p>
-                </div>
+              </div>
                 <div class="col-4 mb-0">
                   <p>Fixed charge: ₹.{{ trip.fixed_charge }}</p>
-                  <p>Extra charge per Km : ₹.{{ trip.extra_charge }}</p>
+                  <p>Extra charge per Km/ Hr : ₹.{{ trip.extra_charge }}</p>
                   <p>Toll : ₹.{{ trip.toll }}</p>
                   <p>Guide fee: ₹.{{ trip.guideFee }}</p>
                   <p>Additional charges: ₹.{{ trip.add_charges }}</p>

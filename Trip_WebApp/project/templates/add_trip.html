@@ -109,10 +109,10 @@
         <div class="row justify-content-center">
             <div class="col-md-7">
             
-                <div class="container">
+                <div class="messages">
                     {% if messages %}
                         {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    <div class="alert alert-success">{{ message }}</div>
                         {% endfor %}
                     {% endif %}
                 </div>
@@ -140,11 +140,15 @@
                             </div>
                             
                             <div class="mb-3 row">
+                                
                                 <div class="col">
+                                    <label for="">Trip no</label>
                                     <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
                                     <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
                                 </div>
+                                
                                 <div class="col">
+                                    <label for="">Date</label>
                                     <input class="form-control" type="date" name="date" required>
                                     <div class="valid-feedback">Date field is valid!</div>
                                     <div class="invalid-feedback">Date is required</div>
@@ -152,39 +156,46 @@
                             </div>
                             
                             <div class="mb-3">
+                                <label for="">vehicle number</label>
                                 <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" required>
                                 <div class="valid-feedback">Vehicle number is valid!</div>
                                 <div class="invalid-feedback">Vehicle number is required</div>
                             </div>
                             
                             <div class="mb-3">
+                                <label for="">Vehicle name</label>
                                 <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" required>
                                 <div class="valid-feedback">Vehicle name is valid!</div>
                                 <div class="invalid-feedback">Vehicle name is required</div>
                             </div>
                             
                             <div class="mb-3">
+                                <label for="">Driver name</label>
                                 <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" required>
                                 <div class="valid-feedback">Driver name is valid!</div>
                                 <div class="invalid-feedback">Driver name is required</div>
                             </div>
                             
                             <div class="mb-3">
+                                <label for="">Guest name</label>
                                 <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" required>
                                 <div class="valid-feedback">Guest name is valid!</div>
                                 <div class="invalid-feedback">Guest name is required</div>
                             </div>
                             
                             <div class="mb-3 row">
+                                
                                 <div class="col">
+                                    <label for="">Fixed charge</label>
                                     <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required >
                                 </div>
-                                <div class="col">
+                                <div class="col"><label for="">Max km</label>
                                     <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" >
                                 </div>
                             </div>
     
                             <div class="mb-3">
+                                <label for="">Extra charge</label>
                                 <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" >
                             </div>
                             
@@ -192,18 +203,20 @@
                             
                             <div class="mb-3 row" id="kilometerFields">
                                 <div class="col">
-                                    <input class="form-control" type="number" id="strt_km" name="strt_km" placeholder="Starting Kilometer" required>
+                                    <label for="">Start km</label>
+                                    <input class="form-control" type="number" id="strt_km" name="strt_km" placeholder="Starting Kilometer" value="0" required>
                                     <div class="valid-feedback">Starting kilometer is valid!</div>
                                     <div class="invalid-feedback">Starting kilometer is required</div>
                                 </div>
                                 <div class="col">
+                                    <label for="">End km</label>
                                     <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer" >
                                     <div class="valid-feedback">Ending kilometer is valid!</div>
                                     <div class="invalid-feedback">Ending kilometer is required</div>
                                 </div>
                             </div>
                             
-                            <form id="rideForm">
+                            
                                 <div class="mb-3 row" id="hourFields">
                                     <div class="text-center mt-1">
                                         <p>Ride Hour</p>
@@ -226,7 +239,8 @@
                                         <input class="form-control" type="text" id="ride_hours" name="ride_hours" placeholder="Ride Hours" readonly>
                                     </div>
                                 </div>
-                            </form>
+                            
+                            
                             
                             <div class="mb-3 row">
                                 <div class="col">
@@ -335,6 +349,59 @@
 <script>
 
 
+
+
+function calculateTotalCharge() {
+        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+        var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
+        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
+        var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
+        var endKm = parseFloat(document.getElementById('end_km').value) || 0;
+
+        // Calculate total kilometers traveled
+        var totalKmTraveled = endKm - startKm;
+
+        // Calculate extra charges if applicable
+        var extraCharges = 0;
+        if (totalKmTraveled > maxKm) {
+            extraCharges = (totalKmTraveled - maxKm) * extraCharge;
+        }
+
+        // Calculate total charge
+        var totalCharge = fixedCharge + extraCharges;
+
+        // Add toll, guide fee, and additional charges
+        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById('tot_charge').value = totalCharge.toFixed(2);
+        calculateBalance();
+    }
+
+    // Calculate balance
+    function calculateBalance() {
+        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+        var advance = parseFloat(document.getElementById('advance').value) || 0;
+        var balance = totalCharge - advance;
+        document.getElementById('balance').value = balance.toFixed(2);
+    }
+
+    // Add event listeners to initial input fields
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculateTotalCharge);
+    });
+
+    // Initial calculation
+    calculateTotalCharge();
+
+
 // Ride Hours
 
 document.getElementById('strt_time').addEventListener('change', calculateRideHours);
@@ -363,24 +430,26 @@ document.getElementById('strt_time').addEventListener('change', calculateRideHou
 
     $(document).ready(function() {
         function toggleFields() {
-            if ($('#trip_type').is(':checked')) {
-                $('#kilometerFields').hide();
-                $('#hourFields').show();
-
-                // Adjust required attributes
-                $('#strt_km').removeAttr('');
-                $('#trip_duration').attr('required', 'required');
-            } else {
-                $('#kilometerFields').show();
-                $('#hourFields').hide();
-
-                // Adjust required attributes
-                $('#strt_km').attr('required');
-                $('#trip_duration').removeAttr('required');
-            }
-        }
-        // Initial toggle state
-        toggleFields();
+                    if ($('#trip_type').is(':checked')) {
+                        $('#kilometerFields').hide();
+                        $('#hourFields').show();
+        
+                        // Adjust required attributes
+                        $("#strt_time").prop('required',true);
+                        $("#end_time").prop('required',true);
+                        $("#start_km").prop('required',false);
+                    } else {
+                        $('#kilometerFields').show();
+                        $('#hourFields').hide();
+        
+                        // Adjust required attributes
+                        $("#strt_time").prop('required',false);
+                        $("#end_time").prop('required',false);
+                        $("#start_km").prop('required',true);
+                    }
+                }
+                // Initial toggle state
+                toggleFields();
 
         // Event listener for the checkbox
         $('#trip_type').change(toggleFields);
@@ -546,55 +615,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('trip_no_display').value = tripNumber;
 
     
-    function calculateTotalCharge() {
-        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
-        var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
-        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
-        var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
-        var endKm = parseFloat(document.getElementById('end_km').value) || 0;
-
-        // Calculate total kilometers traveled
-        var totalKmTraveled = endKm - startKm;
-
-        // Calculate extra charges if applicable
-        var extraCharges = 0;
-        if (totalKmTraveled > maxKm) {
-            extraCharges = (totalKmTraveled - maxKm) * extraCharge;
-        }
-
-        // Calculate total charge
-        var totalCharge = fixedCharge + extraCharges;
-
-        // Add toll, guide fee, and additional charges
-        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-
-        document.getElementById('tot_charge').value = totalCharge.toFixed(2);
-        calculateBalance();
-    }
-
-    // Calculate balance
-    function calculateBalance() {
-        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
-        var advance = parseFloat(document.getElementById('advance').value) || 0;
-        var balance = totalCharge - advance;
-        document.getElementById('balance').value = balance.toFixed(2);
-    }
-
-    // Add event listeners to initial input fields
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', calculateTotalCharge);
-    });
-
-    // Initial calculation
-    calculateTotalCharge();
+    
 });
 </script>
 

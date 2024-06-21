@@ -47,160 +47,221 @@
                 <div class="card-body" style="color: white;">
                     <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                     <p>Add your trip details here..</p><br>
-                    <form class="requires-validation" novalidate method="post">
+                    <form id="tripForm" method="post" action="{% url 'add_trip_details' %}">
                         {% csrf_token %}
                         <div class="mb-3 d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="trip_type" id="km" value="km">
-                                    <label class="form-check-label" for="km">Kilometers</label>
+                                <div class="switch-container">
+                                    <span class="switch-label">Km</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="trip_type" name="trip_type" value="km">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="switch-label">Hours</span>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="trip_type" id="hour" value="hour">
-                                    <label class="form-check-label" for="hour">Hours</label>
-                                </div>
+                                <div class="invalid-feedback">Trip type is required</div>
                             </div>
-                            <button class="btn btn-primary previous-trip" type="button" id="getLastTripBtn">Get last Trip</button>
+                            <a href="{% url 'update_last_trip' %}" class="btn btn-outline-secondary">Get Last Trip</a>
                         </div>
-                    
+                        
                         <div class="mb-3 row">
+                            
                             <div class="col">
+                                <label for="">Trip no</label>
                                 <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
-                                <input class="form-control" type="text" id="trip_no_display" placeholder="Cannot change*" value="{{latest_trip_number}}" readonly>
+                                <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
                             </div>
+                            
                             <div class="col">
-                                <input class="form-control" type="date" name="date"  value="{{ data.date }}" >
+                                <label for="">Date</label>
+                                <input class="form-control" type="date" name="date" required>
                                 <div class="valid-feedback">Date field is valid!</div>
+                                <div class="invalid-feedback">Date is required</div>
                             </div>
                         </div>
-                    
+                        
                         <div class="mb-3">
-                            <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" value="" aria-required="true" >
-                            <div class="invalid-feedback" id="vehicle_number_error">Invalid vehicle number format.</div>
+                            <label for="">vehicle number</label>
+                            <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" required>
+                            <div class="valid-feedback">Vehicle number is valid!</div>
+                            <div class="invalid-feedback">Vehicle number is required</div>
                         </div>
-                    
+                        
                         <div class="mb-3">
-                            <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" value="" aria-required="true" >
+                            <label for="">Vehicle name</label>
+                            <input class="form-control" type="text" name="vehicle_name" placeholder="Vehicle Name*" required>
+                            <div class="valid-feedback">Vehicle name is valid!</div>
+                            <div class="invalid-feedback">Vehicle name is required</div>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label for="">Driver name</label>
+                            <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" required>
+                            <div class="valid-feedback">Driver name is valid!</div>
+                            <div class="invalid-feedback">Driver name is required</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="">Guest name</label>
+                            <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" required>
+                            <div class="valid-feedback">Guest name is valid!</div>
+                            <div class="invalid-feedback">Guest name is required</div>
+                        </div>
+                        
+                        <div class="mb-3 row">
+                            
+                            <div class="col">
+                                <label for="">Fixed charge</label>
+                                <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required >
+                            </div>
+                            <div class="col"><label for="">Max km</label>
+                                <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" >
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="">Extra charge</label>
+                            <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" >
+                        </div>
+                        
                     
+                        
+                        <div class="mb-3 row" id="kilometerFields">
+                            <div class="col">
+                                <label for="">Start km</label>
+                                <input class="form-control" type="number" id="strt_km" name="strt_km" placeholder="Starting Kilometer" value="0" required>
+                                <div class="valid-feedback">Starting kilometer is valid!</div>
+                                <div class="invalid-feedback">Starting kilometer is required</div>
+                            </div>
+                            <div class="col">
+                                <label for="">End km</label>
+                                <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer" >
+                                <div class="valid-feedback">Ending kilometer is valid!</div>
+                                <div class="invalid-feedback">Ending kilometer is required</div>
+                            </div>
+                        </div>
+                        
+                        
+                            <div class="mb-3 row" id="hourFields">
+                                <div class="text-center mt-1">
+                                    <p>Ride Hour</p>
+                                    <hr>
+                                </div>
+                                <div class="col">
+                                    <label for="strt_time">Start*</label>
+                                    <input class="form-control" type="time" id="strt_time" name="strt_time" placeholder="Starting Time" required>
+                                    <div class="valid-feedback">Starting time is valid!</div>
+                                    <div class="invalid-feedback">Starting time is required</div>
+                                </div>
+                                <div class="col">
+                                    <label for="end_time">End*</label>
+                                    <input class="form-control" type="datetime-local" id="end_time" name="end_time" placeholder="Ending Time" required>
+                                    <div class="valid-feedback">Ending time is valid!</div>
+                                    <div class="invalid-feedback">Ending time is required</div>
+                                </div>
+                                <div class="col">
+                                    <label for="ride_hours">Hours</label>
+                                    <input class="form-control" type="text" id="ride_hours" name="ride_hours" placeholder="Ride Hours" readonly>
+                                </div>
+                            </div>
+                        
+                        
+                        
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" value="" aria-required="true" required >
+                                <label for="strt_place">Starting Place*</label>
+                                <input class="form-control" type="text" id="strt_place" name="strt_place" placeholder="Starting Place*" required>
+                                <div class="valid-feedback">Starting place is valid!</div>
+                                <div class="invalid-feedback">Starting place is required</div>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" value="20" aria-required="true" >
+                                <label for="time">Time*</label>
+                                <input class="form-control" type="time" id="time" name="time" placeholder="Time*" required>
+                                <div class="valid-feedback">Time is valid!</div>
+                                <div class="invalid-feedback">Time is required</div>
                             </div>
                         </div>
-                    
-                        <div class="mb-3">
-                            <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" value="" aria-required="true" >
-                        </div>
-                    
-                        <div class="mb-3">
-                            <input class="form-control" type="text" name="driver_name" placeholder="Driver Name*" value="" aria-required="true">
-                        </div>
-                    
-                        <div class="mb-3">
-                            <input class="form-control" type="text" name="guest_name" placeholder="Guest Name*" value="" aria-required="true">
-                        </div>
-                    
-                        <div id="kilometers-fields">
-                            <div class="mb-3 row">
-                                <div class="col">
-                                    <input class="form-control" type="number" id="start_km" name="start_km" placeholder="Starting Kilometer*" >
-                                </div>
-                                <div class="col">
-                                    <input class="form-control" type="number" id="end_km" name="end_km" value="" placeholder="Ending Kilometer*" >
-                                </div>
-                            </div>
-                        </div>
-                    
-                        <div id="hours-fields" class="hidden">
-                            <div class="mb-3 row">
-                                <div class="col">
-                                    <input class="form-control" type="datetime" name="start_hour" value="" placeholder="Starting Hour*">
-                                </div>
-                                <div class="col">
-                                    <input class="form-control" type="datetime" name="end_hour" value="" placeholder="Ending Hour*">
-                                </div>
-                            </div>
-                        </div>
-                    
+                        
                         <div class="mb-3 row">
                             <div class="col">
-                                <input class="form-control" type="text" name="strt_place"  value="" placeholder="Starting Place*" >
+                                <label for="destination">Destination</label>
+                                <input class="form-control" type="text" id="destination" name="destination" placeholder="Destination*">
+                                <div class="valid-feedback">Destination is valid!</div>
+                                <div class="invalid-feedback">Destination is required</div>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="time" name="time" value="" placeholder="Time*">
+                                <label for="time_arrival">Time of Arrival</label>
+                                <input class="form-control" type="time" id="time_arrival" name="time_arrival" placeholder="Time of Arrival*">
+                                <div class="valid-feedback">Time of arrival is valid!</div>
+                                <div class="invalid-feedback">Time of arrival is required</div>
                             </div>
                         </div>
-                    
+                        
                         <div class="mb-3 row">
-                            <div class="col">
-                                <input class="form-control" type="text" value="" name="destination" placeholder="Destination*">
+                            <div class="col-6">
+                                <label for="arrival_date">Arrival Date</label>
+                                <input class="form-control" type="date" id="arrival_date" name="arrival_date" placeholder="Arrival date*" >
+                                <div class="valid-feedback">Arrival date is valid!</div>
+                                <div class="invalid-feedback">Arrival date is required</div>
                             </div>
-                            <div class="col">
-                                <input class="form-control" type="time" name="time_arrival" value="" placeholder="Time of Arrival*">
+                            <div class="col-6">
+                                <label for="trip_days">Trip Days*</label>
+                                <input class="form-control" type="number" id="trip_days" name="trip_days" placeholder="No of days*" readonly>
+                                <div class="valid-feedback">Number of days is valid!</div>
+                                <div class="invalid-feedback">Number of days is required</div>
                             </div>
                         </div>
-                    
-                        <div class="mb-3">
-                            <p>Trip end date*</p>
-                            <input class="form-control" type="date" name="arrival_date" value="" placeholder="Arrival date*" >
-                        </div>
-                    
-                        <div class="mb-3">
-                            <p></p>
-                            <input class="form-control" type="number" name="trip_days" placeholder="No of days*" >
-                        </div>
-                    
+                        
+                        <hr>
+                        
                         <div class="mb-3">
                             <p>Additional charges*</p>
                             <div id="inputContainer">
-                                <p>*Toll</p>
+                                <label for="toll">Toll*</label>
                                 <div class="input-group mb-2">
-                                    <input class="form-control" type="number" id="toll" name="toll" value="0" placeholder="Toll*" >
+                                    <input class="form-control" type="number" name="toll" value="0" placeholder="Toll*">
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn mt-2" type="button">Toll +</button>
                         </div>
+                        
                         <hr style="height: 3px;">
-                    
+                        
                         <div class="mb-3">
                             <div id="inputContainer1">
+                                <label for="">Guide Fee*</label>
                                 <div class="input-group mb-2">
-                                    <input class="form-control" type="number" id="guidefee" value="0" name="guidefee" placeholder="Guide Fee*" >
+                                    <input class="form-control" type="number" value="0" name="guidefee" placeholder="Guide Fee*">
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn2 mt-2" type="button">Fee +</button>
                         </div>
-                    
+                        
                         <div class="mb-3">
-                            <p>Additional charges</p>
                             <div id="inputContainer2">
+                                <label for="add_charges">Extra expenses*</label>
                                 <div class="input-group mb-2">
-                                    <input class="form-control" type="number" id="add_charges" value="0" name="add_charges" placeholder="Additional charges*" >
+                                    <input class="form-control" type="number" value="0" name="add_charges" placeholder="Extra expenses*">
                                 </div>
                             </div>
                             <button class="btn btn-light add-btn3 mt-2" type="button">Add +</button>
                         </div>
+                        
                         <hr style="height: 3px;">
-                    
                         <div class="mb-3">
                             <h5 class="text-center">Payment details</h5>
                             <input class="form-control" type="number" id="tot_charge" name="tot_charge" placeholder="Total Charge*" >
                         </div>
-                    
+
                         <div class="mb-3">
-                            <input class="form-control" type="number" id="advance" name="advance" placeholder="Advance*" >
+                            <input class="form-control" type="number" id="advance" name="advance" placeholder="Advance*" step="0">
                         </div>
-                    
+
                         <div class="mb-3">
                             <input class="form-control" type="number" id="balance" name="balance" placeholder="Balance amount*" >
                         </div>
-                    
-                        <div class="mb-3">        
-                            <button class="btn btn-secondary" type="button" id="update-trip">Update Trip Details</button>
+                        <div class="mb-3">
+                            <button class="btn btn-primary" type="submit">Submit Trip Details</button>
                         </div>
                     </form>
                 </div>
@@ -212,20 +273,27 @@
 <script>
 
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Existing JavaScript for form validation and handling
 
+
+
+document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('getLastTripBtn').addEventListener('click', function() {
         fetch('{% url "get_last_trip_details" %}')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.error) {
-                    const messageContainer = document.getElementById('message-container');
-                    messageContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    // Handle error case if needed
+                    console.error('Error fetching last trip details:', data.error);
                 } else {
-                    // Populate the form with the last trip data
+                    // Populate form fields with data
                     document.getElementsByName('trip_no')[0].value = data.trip_no;
-                    document.getElementsByName('date')[0].value = data.date;
+                    document.querySelector('input[name="date"]').value = data.date;
+                    document.querySelector('input[name="vehicle_number"]').value = data.vehicle_number;
                     document.getElementsByName('vehicle_name')[0].value = data.vehicle_name;
                     document.getElementsByName('vehicle_number')[0].value = data.vehicle_number;
                     document.getElementsByName('fixed_charge')[0].value = data.fixed_charge;
@@ -254,7 +322,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 });
-
 
 
 
