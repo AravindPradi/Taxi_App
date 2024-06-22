@@ -123,7 +123,7 @@ def add_trip_details(request):
         destination = request.POST.get('destination')
         time_arrival = request.POST.get('time_arrival')
         arrival_date = request.POST.get('arrival_date')
-        trip_days = request.POST.get('trip_days')
+        trip_days = request.POST.get('trip_days',None)
         toll = request.POST.get('toll')
         guidefee = request.POST.get('guidefee')
         add_charges = request.POST.get('add_charges')
@@ -133,36 +133,26 @@ def add_trip_details(request):
 
         errors = []
 
-        if not trip_no:
-            errors.append("Trip number is required")
-        if not date:
-            errors.append("Date is required")
-        if not vehicle_number:
-            errors.append("Vehicle number is required")
-        if not vehicle_name:
-            errors.append("Vehicle name is required")
-        if not driver_name:
-            errors.append("Driver name is required")
-        if not guest_name:
-            errors.append("Guest name is required")
-        if not fixed_charge:
-            errors.append("Fixed charge is required")
-        if not max_km:
-            errors.append("Max kilometer is required")
-        if not extra_charge:
-            errors.append("Extra charge per km/hour is required")
-        if not strt_place:
-            errors.append("Starting place is required")
-        if not time:
-            errors.append("Time is required")
-        if not arrival_date:
-            pass
-        if not trip_days:
-            pass
-        if not tot_charge:
-            errors.append("Total charge is required")
-        if not balance:
-            errors.append("Balance amount is required")
+
+        required_fields = {
+            'Trip number': trip_no,
+            'Date': date,
+            'Vehicle number': vehicle_number,
+            'Vehicle name': vehicle_name,
+            'Driver name': driver_name,
+            'Guest name': guest_name,
+            'Fixed charge': fixed_charge,
+            'Max kilometer': max_km,
+            'Extra charge per km/hour': extra_charge,
+            'Starting place': strt_place,
+            'Time': time,
+            'Total charge': tot_charge,
+            'Balance amount': balance
+        }
+
+        for field_name, field_value in required_fields.items():
+            if not field_value:
+                errors.append(f"{field_name} is required")
 
         if errors:
             for error in errors:
@@ -170,8 +160,14 @@ def add_trip_details(request):
             return redirect(reverse('add_trip_details'))
 
         try:
-            
-            trip = Trip(
+            strt_time_obj = parse_time(strt_time) if strt_time else None
+            end_time_obj = parse_time(end_time) if end_time else None
+            ride_hours = None
+
+            if strt_time_obj and end_time_obj:
+                ride_hours = ((datetime.combine(datetime.min, end_time_obj) - datetime.combine(datetime.min, strt_time_obj)).total_seconds() / 3600)
+
+            trip = Trip.objects.create(
                 trip_no=trip_no,
                 date=parse_date(date),
                 vehicle_number=vehicle_number,
@@ -183,9 +179,9 @@ def add_trip_details(request):
                 extra_charge=float(extra_charge) if extra_charge else 0,
                 strt_km=int(strt_km) if strt_km else None,
                 end_km=int(end_km) if end_km else None,
-                strt_time=parse_time(strt_time) if strt_time else None,
-                end_time=parse_time(end_time) if end_time else None,
-                ride_hours=((datetime.combine(datetime.min, parse_time(end_time)) - datetime.combine(datetime.min, parse_time(strt_time))).total_seconds() / 3600) if strt_time and end_time else None,
+                strt_time=strt_time_obj,
+                end_time=end_time_obj,
+                ride_hours=ride_hours,
                 strt_place=strt_place,
                 time=parse_time(time),
                 destination=destination,
@@ -209,7 +205,6 @@ def add_trip_details(request):
             messages.error(request, str(e))
             return redirect(reverse('add_trip_details'))
 
-    # Retrieve latest trip number for display in form
     if Trip.objects.exists():
         latest_trip = Trip.objects.latest('trip_no').trip_no
         latest_trip_number = f'TR{int(latest_trip[2:]) + 1:03d}'
@@ -227,12 +222,20 @@ def all_trip_table(request):
     return render(request,'all_trips_table.html', context=context)
 
 
-def trip_view(request,id):
-    trip = get_object_or_404(Trip,id=id)
-    distance_travelled = trip.end_km - trip.strt_km
-    context = {'trip':trip,
-               'distance_travelled':distance_travelled}
-    return render(request,'trip_view.html',context=context)
+def trip_view(request, id):
+    trip = get_object_or_404(Trip, id=id)
+    
+    
+    distance_travelled = None
+    if trip.strt_km is not None and trip.end_km is not None:
+        distance_travelled = trip.end_km - trip.strt_km
+    
+    context = {
+        'trip': trip,
+        'distance_travelled': distance_travelled
+    }
+    
+    return render(request, 'trip_view.html', context=context)
 
 
 def logout(request):
@@ -314,7 +317,7 @@ def update_trip(request):
             trip.extra_charge = float(data.get('extra_charge'))
             trip.driver_name = data.get('driver_name')
             trip.guest_name = data.get('guest_name')
-            trip.start_km = float(data.get('start_km'))
+            trip.start_km = data.get('start_km')
             trip.end_km = float(data.get('end_km'))
             trip.strt_place = data.get('strt_place')
             trip.time = data.get('time')
