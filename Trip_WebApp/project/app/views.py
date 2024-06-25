@@ -105,6 +105,7 @@ from datetime import datetime
 @csrf_protect
 def add_trip_details(request):
     if request.method == 'POST':
+        trip_type = request.POST.get('trip_type')
         trip_no = request.POST.get('trip_no')
         date = request.POST.get('date')
         vehicle_number = request.POST.get('vehicle_number')
@@ -117,6 +118,7 @@ def add_trip_details(request):
         strt_km = request.POST.get('strt_km')
         end_km = request.POST.get('end_km')
         strt_time = request.POST.get('strt_time')
+        ride_hours = request.POST.get('end_time')
         end_time = request.POST.get('end_time')
         strt_place = request.POST.get('strt_place')
         time = request.POST.get('time')
@@ -135,6 +137,7 @@ def add_trip_details(request):
 
 
         required_fields = {
+            'Trip type' : trip_type,
             'Trip number': trip_no,
             'Date': date,
             'Vehicle number': vehicle_number,
@@ -168,6 +171,7 @@ def add_trip_details(request):
                 ride_hours = ((datetime.combine(datetime.min, end_time_obj) - datetime.combine(datetime.min, strt_time_obj)).total_seconds() / 3600)
 
             trip = Trip.objects.create(
+                trip_type=trip_type,
                 trip_no=trip_no,
                 date=parse_date(date),
                 vehicle_number=vehicle_number,
@@ -265,11 +269,14 @@ def get_last_trip_details(request):
             'guest_name': latest_trip.guest_name,
             'strt_km': latest_trip.strt_km,
             'end_km': latest_trip.end_km,
+            'strt_time':latest_trip.strt_time,
+            'end_time':latest_trip.end_time,
+            'ride_hours':latest_trip.ride_hours,
             'strt_place': latest_trip.strt_place,
-            'time': latest_trip.time.strftime('%Y-%m-%dT%H:%M'),  
+            'time': latest_trip.time,  
             'destination': latest_trip.destination,
-            'time_arrival': latest_trip.time_arrival.strftime('%H:%M'),  
-            'arrival_date': latest_trip.arrival_date.strftime('%Y-%m-%d'),
+            'time_arrival': latest_trip.time_arrival,
+            'arrival_date': latest_trip.arrival_date,
             'trip_days': latest_trip.trip_days,
             'toll': latest_trip.toll,
             'guidefee': latest_trip.guidefee,
@@ -318,10 +325,14 @@ def update_trip(request):
             trip.driver_name = data.get('driver_name')
             trip.guest_name = data.get('guest_name')
             trip.start_km = data.get('start_km')
-            trip.end_km = float(data.get('end_km'))
+            end_km = data.get('end_km')
+            trip.end_km = float(end_km) if end_km not in [None, ''] else 0
             trip.strt_place = data.get('strt_place')
             trip.time = data.get('time')
             trip.destination = data.get('destination')
+            trip.strt_time = data.get('strt_time')
+            trip.end_time = data.get('end_time')
+            trip.ride_hours = data.get('ride_hours')
             trip.time_arrival = data.get('time_arrival')
             trip.arrival_date = data.get('arrival_date')
             trip.trip_days = int(data.get('trip_days'))

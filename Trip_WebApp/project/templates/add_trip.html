@@ -129,7 +129,7 @@
                                     <div class="switch-container">
                                         <span class="switch-label">Km</span>
                                         <label class="switch">
-                                            <input type="checkbox" id="trip_type" name="trip_type" value="km">
+                                            <input type="checkbox" id="trip_type" name="trip_type" >
                                             <span class="slider"></span>
                                         </label>
                                         <span class="switch-label">Hours</span>
@@ -196,7 +196,7 @@
     
                             <div class="mb-3">
                                 <label for="">Extra charge</label>
-                                <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km*" aria-required="true" >
+                                <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km/ hr*" aria-required="true" >
                             </div>
                             
                         
@@ -224,7 +224,7 @@
                                     </div>
                                     <div class="col">
                                         <label for="strt_time">Start*</label>
-                                        <input class="form-control" type="time" id="strt_time" name="strt_time" placeholder="Starting Time" required>
+                                        <input class="form-control" type="datetime-local" id="strt_time" name="strt_time" placeholder="Starting Time" required>
                                         <div class="valid-feedback">Starting time is valid!</div>
                                         <div class="invalid-feedback">Starting time is required</div>
                                     </div>
@@ -352,125 +352,130 @@
 
 
 function calculateTotalCharge() {
-        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
-        var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
-        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
-        var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
-        var endKm = parseFloat(document.getElementById('end_km').value) || 0;
+    var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+    var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
+    var extraChargeKm = parseFloat(document.getElementById('extra_charge').value) || 0;
+    var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
+    var endKm = parseFloat(document.getElementById('end_km').value) || 0;
+    var extraChargeHr = parseFloat(document.getElementById('extra_charge').value) || 50;
 
-        // Calculate total kilometers traveled
-        var totalKmTraveled = endKm - startKm;
+    // Calculate total kilometers traveled
+    var totalKmTraveled = endKm - startKm;
 
-        // Calculate extra charges if applicable
-        var extraCharges = 0;
-        if (totalKmTraveled > maxKm) {
-            extraCharges = (totalKmTraveled - maxKm) * extraCharge;
-        }
-
-        // Calculate total charge
-        var totalCharge = fixedCharge + extraCharges;
-
-        // Add toll, guide fee, and additional charges
-        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-
-        document.getElementById('tot_charge').value = totalCharge.toFixed(2);
-        calculateBalance();
+    // Calculate extra charges for kilometers
+    var extraChargesKm = 0;
+    if (totalKmTraveled > maxKm) {
+        extraChargesKm = (totalKmTraveled - maxKm) * extraChargeKm;
     }
 
-    // Calculate balance
-    function calculateBalance() {
-        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
-        var advance = parseFloat(document.getElementById('advance').value) || 0;
-        var balance = totalCharge - advance;
-        document.getElementById('balance').value = balance.toFixed(2);
-    }
+    // Calculate ride hours and extra charges for hours
+    calculateRideHours();
+    var rideHours = parseFloat(document.getElementById('ride_hours').value) || 0;
+    var extraChargesHr = rideHours * extraChargeHr;
 
-    // Add event listeners to initial input fields
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', calculateTotalCharge);
+    // Calculate total charge
+    var totalCharge = fixedCharge + extraChargesKm + extraChargesHr;
+
+    // Add toll, guide fee, and additional charges
+    document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+    });
+    document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+    });
+    document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
     });
 
-    // Initial calculation
-    calculateTotalCharge();
+    document.getElementById('tot_charge').value = totalCharge.toFixed(2);
+    calculateBalance();
+}
 
+// Calculate balance
+function calculateBalance() {
+    var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+    var advance = parseFloat(document.getElementById('advance').value) || 0;
+    var balance = totalCharge - advance;
+    document.getElementById('balance').value = balance.toFixed(2);
+}
+
+// Add event listeners to initial input fields
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', calculateTotalCharge);
+});
+
+// Initial calculation
+calculateTotalCharge();
 
 // Ride Hours
-
 document.getElementById('strt_time').addEventListener('change', calculateRideHours);
-    document.getElementById('end_time').addEventListener('change', calculateRideHours);
+document.getElementById('end_time').addEventListener('change', calculateRideHours);
 
-    function calculateRideHours() {
-        const startTime = document.getElementById('strt_time').value;
-        const endTime = document.getElementById('end_time').value;
+function calculateRideHours() {
+    const startTime = document.getElementById('strt_time').value;
+    const endTime = document.getElementById('end_time').value;
 
-        if (startTime && endTime) {
-            const start = new Date(startTime);
-            const end = new Date(endTime);
+    if (startTime && endTime) {
+        const start = new Date(`1970-01-01T${startTime}:00Z`);
+        const end = new Date(`1970-01-01T${endTime}:00Z`);
 
-            if (end > start) {
-                const diff = (end - start) / (1000 * 60 * 60); // difference in hours
-                document.getElementById('ride_hours').value = diff.toFixed(2); // display with two decimal places
-            } else {
-                document.getElementById('ride_hours').value = 'Invalid time range';
-            }
+        if (end > start) {
+            const diff = (end - start) / (1000 * 60 * 60); // difference in hours
+            document.getElementById('ride_hours').value = diff.toFixed(2); // display with two decimal places
+        } else {
+            document.getElementById('ride_hours').value = 'Invalid time range';
         }
     }
-
+}
 
 
 
 
     $(document).ready(function() {
-        function toggleFields() {
-                    if ($('#trip_type').is(':checked')) {
-                        $('#kilometerFields').hide();
-                        $('#hourFields').show();
-        
-                        // Adjust required attributes
-                        $("#strt_time").prop('required',true);
-                        $("#end_time").prop('required',true);
-                        $("#start_km").prop('required',false);
-                    } else {
-                        $('#kilometerFields').show();
-                        $('#hourFields').hide();
-        
-                        // Adjust required attributes
-                        $("#strt_time").prop('required',false);
-                        $("#end_time").prop('required',false);
-                        $("#start_km").prop('required',true);
-                    }
-                }
-                // Initial toggle state
-                toggleFields();
+    function toggleFields() {
+        if ($('#trip_type').is(':checked')) {
+            $('#kilometerFields').hide();
+            $('#hourFields').show();
 
-        // Event listener for the checkbox
-        $('#trip_type').change(toggleFields);
+            // Adjust required attributes
+            $("#strt_time").prop('required', true);
+            $("#end_time").prop('required', true);
+            $("#strt_km").prop('required', false);
+        } else {
+            $('#kilometerFields').show();
+            $('#hourFields').hide();
 
-        // Custom Bootstrap validation
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.prototype.slice.call(forms)
-                .forEach(function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }
-                        form.classList.add('was-validated')
-                    }, false)
-                })
-        })();
+            // Adjust required attributes
+            $("#strt_time").prop('required', false);
+            $("#end_time").prop('required', false);
+            $("#strt_km").prop('required', true);
+        }
+    }
+
+    // Initial toggle state
+    toggleFields();
+
+    // Toggle fields when the trip type checkbox changes
+    $('#trip_type').change(function() {
+        toggleFields();
     });
 
+    // Bootstrap validation
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+    })();
+});
 
 // (function () {
 //             'use strict';
@@ -618,6 +623,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
 });
 </script>
+
+
+
 
 
 
