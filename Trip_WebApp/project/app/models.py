@@ -30,7 +30,7 @@ class Trip(models.Model):
     end_km = models.PositiveIntegerField(blank=True, null=True)  
     strt_time = models.DateTimeField(blank=True, null=True)  
     end_time = models.DateTimeField(blank=True, null=True)  
-    ride_hours = models.DateTimeField(blank=True, null=True)
+    ride_hours = models.FloatField(blank=True, null=True)
     strt_place = models.CharField(max_length=100)
     time = models.TimeField()  
     destination = models.CharField(max_length=100)

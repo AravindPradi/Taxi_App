@@ -1,17 +1,18 @@
 
-{% load static %}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Trip</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/touring.png' %}">
+    <link rel="shortcut icon" type="image/png" href="/static/images/touring.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://bootswatch.com/5/flatly/bootstrap.min.css">
    
 
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="/static/css/style.css">
     <style>
         .previous-trip {
             float: right;
@@ -89,17 +90,14 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}"><b>Take A Trip</b></a>
+            <a class="navbar-brand" href="/"><b>Take A Trip</b></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'home' %}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'all_trip_table' %}">Trip Details</a>
+                        <a class="nav-link" href="/all_trip_table">Trip Details</a>
                     </li>
                 </ul>
             </div>
@@ -110,11 +108,7 @@
             <div class="col-md-7">
             
                 <div class="messages">
-                    {% if messages %}
-                        {% for message in messages %}
-                    <div class="alert alert-success">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
+                    
                 </div>
             
                 <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733; border-color: white; border-radius: 18px; border-width: 3px;">
@@ -122,29 +116,29 @@
                         <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                         <p>Add your trip details here..</p><br>
 
-                        <form id="tripForm" method="post" action="{% url 'add_trip_details' %}">
-                            {% csrf_token %}
+                        <form id="tripForm" method="post" action="/add_trip_details">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="T7axz5TEYhhGgofZtY7XulcmXrrIV0jMkANPZcEHC7qgPxBYO4xe3DatKn3TRUOy">
                             <div class="mb-3 d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="switch-container">
                                         <span class="switch-label">Km</span>
                                         <label class="switch">
-                                            <input type="checkbox" id="trip_type" name="trip_type" >
+                                            <input type="checkbox" id="trip_type" name="trip_type">
                                             <span class="slider"></span>
                                         </label>
                                         <span class="switch-label">Hours</span>
                                     </div>
                                     <div class="invalid-feedback">Trip type is required</div>
                                 </div>
-                                <a href="{% url 'update_last_trip' %}" class="btn btn-outline-secondary">Get Last Trip</a>
+                                <a href="/update_last_trip_page" class="btn btn-outline-secondary">Get Last Trip</a>
                             </div>
                             
                             <div class="mb-3 row">
                                 
                                 <div class="col">
                                     <label for="">Trip no</label>
-                                    <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
-                                    <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
+                                    <input type="hidden" id="trip_no_hidden" name="trip_no" value="TR001">
+                                    <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="TR001" readonly>
                                 </div>
                                 
                                 <div class="col">
@@ -155,11 +149,11 @@
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="">vehicle number</label>
+                            <div class="mb-3" id="vehicleForm">
+                                <label for="vehicle_number">Vehicle Number</label>
                                 <input class="form-control" type="text" name="vehicle_number" id="vehicle_number" placeholder="Vehicle Number*" required>
                                 <div class="valid-feedback">Vehicle number is valid!</div>
-                                <div class="invalid-feedback">Vehicle number is required</div>
+                                <div class="invalid-feedback">Vehicle number is required and must follow the pattern: KL04 AH 1647</div>
                             </div>
                             
                             <div class="mb-3">
@@ -236,7 +230,7 @@
                                     </div>
                                     <div class="col">
                                         <label for="ride_hours">Hours</label>
-                                        <input class="form-control" type="text" id="ride_hours" name="ride_hours" placeholder="Ride Hours" readonly>
+                                        <input class="form-control" type="number" id="ride_hours" name="ride_hours" placeholder="Ride Hours" readonly>
                                     </div>
                                 </div>
                             
@@ -272,7 +266,7 @@
                                 </div>
                             </div>
                             
-                            <div class="mb-3 row">
+                            <div class="mb-3 row" >
                                 <div class="col-6">
                                     <label for="arrival_date">Arrival Date</label>
                                     <input class="form-control" type="date" id="arrival_date" name="arrival_date" placeholder="Arrival date*" >
@@ -281,7 +275,7 @@
                                 </div>
                                 <div class="col-6">
                                     <label for="trip_days">Trip Days*</label>
-                                    <input class="form-control" type="number" id="trip_days" name="trip_days" placeholder="No of days*" readonly>
+                                    <input class="form-control" type="number" id="trip_days" name="trip_days" step="0" placeholder="No of days*" readonly>
                                     <div class="valid-feedback">Number of days is valid!</div>
                                     <div class="invalid-feedback">Number of days is required</div>
                                 </div>
@@ -290,7 +284,7 @@
                             <hr>
                             
                             <div class="mb-3">
-                                <p>Additional charges*</p>
+                        
                                 <div id="inputContainer">
                                     <label for="toll">Toll*</label>
                                     <div class="input-group mb-2">
@@ -350,132 +344,181 @@
 
 
 
-
-function calculateTotalCharge() {
-    var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
-    var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
-    var extraChargeKm = parseFloat(document.getElementById('extra_charge').value) || 0;
-    var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
-    var endKm = parseFloat(document.getElementById('end_km').value) || 0;
-    var extraChargeHr = parseFloat(document.getElementById('extra_charge').value) || 50;
-
-    // Calculate total kilometers traveled
-    var totalKmTraveled = endKm - startKm;
-
-    // Calculate extra charges for kilometers
-    var extraChargesKm = 0;
-    if (totalKmTraveled > maxKm) {
-        extraChargesKm = (totalKmTraveled - maxKm) * extraChargeKm;
-    }
-
-    // Calculate ride hours and extra charges for hours
-    calculateRideHours();
-    var rideHours = parseFloat(document.getElementById('ride_hours').value) || 0;
-    var extraChargesHr = rideHours * extraChargeHr;
-
-    // Calculate total charge
-    var totalCharge = fixedCharge + extraChargesKm + extraChargesHr;
-
-    // Add toll, guide fee, and additional charges
-    document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
-        totalCharge += parseFloat(input.value) || 0;
-    });
-    document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
-        totalCharge += parseFloat(input.value) || 0;
-    });
-    document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
-        totalCharge += parseFloat(input.value) || 0;
-    });
-
-    document.getElementById('tot_charge').value = totalCharge.toFixed(2);
-    calculateBalance();
-}
-
-// Calculate balance
-function calculateBalance() {
-    var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
-    var advance = parseFloat(document.getElementById('advance').value) || 0;
-    var balance = totalCharge - advance;
-    document.getElementById('balance').value = balance.toFixed(2);
-}
-
-// Add event listeners to initial input fields
-document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', calculateTotalCharge);
-});
-
-// Initial calculation
-calculateTotalCharge();
-
-// Ride Hours
-document.getElementById('strt_time').addEventListener('change', calculateRideHours);
-document.getElementById('end_time').addEventListener('change', calculateRideHours);
-
-function calculateRideHours() {
-    const startTime = document.getElementById('strt_time').value;
-    const endTime = document.getElementById('end_time').value;
-
-    if (startTime && endTime) {
-        const start = new Date(`1970-01-01T${startTime}:00Z`);
-        const end = new Date(`1970-01-01T${endTime}:00Z`);
-
-        if (end > start) {
-            const diff = (end - start) / (1000 * 60 * 60); // difference in hours
-            document.getElementById('ride_hours').value = diff.toFixed(2); // display with two decimal places
-        } else {
-            document.getElementById('ride_hours').value = 'Invalid time range';
-        }
-    }
-}
-
-
-
-
-    $(document).ready(function() {
-    function toggleFields() {
-        if ($('#trip_type').is(':checked')) {
-            $('#kilometerFields').hide();
-            $('#hourFields').show();
-
-            // Adjust required attributes
-            $("#strt_time").prop('required', true);
-            $("#end_time").prop('required', true);
-            $("#strt_km").prop('required', false);
-        } else {
-            $('#kilometerFields').show();
-            $('#hourFields').hide();
-
-            // Adjust required attributes
-            $("#strt_time").prop('required', false);
-            $("#end_time").prop('required', false);
-            $("#strt_km").prop('required', true);
-        }
-    }
-
-    // Initial toggle state
-    toggleFields();
-
-    // Toggle fields when the trip type checkbox changes
-    $('#trip_type').change(function() {
-        toggleFields();
-    });
-
-    // Bootstrap validation
-    (function () {
-        'use strict';
-        var forms = document.querySelectorAll('.needs-validation');
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
+(function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var form = document.getElementById('vehicleForm');
+                form.addEventListener('submit', function(event) {
                     if (!form.checkValidity()) {
                         event.preventDefault();
                         event.stopPropagation();
                     }
                     form.classList.add('was-validated');
                 }, false);
+
+                var vehicleNumberInput = document.getElementById('vehicle_number');
+                vehicleNumberInput.addEventListener('input', function() {
+                    var pattern = /^[A-Z]{2}\d{2}\s?[A-Z]{1,2}\s?\d{1,4}$/;
+                    if (pattern.test(vehicleNumberInput.value)) {
+                        vehicleNumberInput.setCustomValidity('');
+                    } else {
+                        vehicleNumberInput.setCustomValidity('Invalid');
+                    }
+                });
+            }, false);
+        })();
+
+
+
+
+
+
+
+        function calculateTotalCharge() {
+        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+        var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
+        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
+        var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
+        var endKm = parseFloat(document.getElementById('end_km').value) || 0;
+
+        // Calculate total kilometers traveled
+        var totalKmTraveled = endKm - startKm;
+
+        // Calculate extra charges if applicable
+        var extraCharges = 0;
+        if (totalKmTraveled > maxKm) {
+            extraCharges = (totalKmTraveled - maxKm) * extraCharge;
+        }
+
+        // Calculate total charge
+        var totalCharge = fixedCharge + extraCharges;
+
+        // Add toll, guide fee, and additional charges
+        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
+            totalCharge += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById('tot_charge').value = totalCharge.toFixed(2);
+        calculateBalance();
+    }
+
+    // Calculate balance
+    function calculateBalance() {
+        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+        var advance = parseFloat(document.getElementById('advance').value) || 0;
+        var balance = totalCharge - advance;
+        document.getElementById('balance').value = balance.toFixed(2);
+    }
+
+    // Add event listeners to initial input fields
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculateTotalCharge);
+    });
+
+    // Initial calculation
+    calculateTotalCharge();
+
+
+// Ride Hours
+
+document.getElementById('strt_time').addEventListener('change', calculateRideHours);
+    document.getElementById('end_time').addEventListener('change', calculateRideHours);
+
+    function calculateRideHours() {
+        const startTime = document.getElementById('strt_time').value;
+        const endTime = document.getElementById('end_time').value;
+
+        if (startTime && endTime) {
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+
+            if (end > start) {
+                const diff = (end - start) / (1000 * 60 * 60); // difference in hours
+                document.getElementById('ride_hours').value = diff.toFixed(2); // display with two decimal places
+            } else {
+                document.getElementById('ride_hours').value = 'Invalid time range';
+            }
+        }
+    }
+
+
+
+
+
+    $(document).ready(function() {
+        function toggleFields() {
+            if ($('#trip_type').is(':checked')) {
+                $('#kilometerFields').hide();
+                $('#hourFields').show();
+
+                // Adjust required attributes
+                $("#strt_time").prop('required',true);
+                $("#end_time").prop('required',true);
+                $("#start_km").prop('required',false);
+            } else {
+                $('#kilometerFields').show();
+                $('#hourFields').hide();
+
+                // Adjust required attributes
+                $("#strt_time").prop('required',false);
+                $("#end_time").prop('required',false);
+                $("#start_km").prop('required',true);
+            }
+        }
+
+        // Initial toggle state
+        toggleFields();
+
+        // Event listener for the checkbox
+        $('#trip_type').change(function() {
+            toggleFields();
+            
+            const tripType = $('#trip_type').is(':checked') ? 'hours' : 'km';
+
+            fetch('/update-trip-type', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ trip_type: tripType }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Trip type updated successfully');
+                } else {
+                    console.error('Failed to update trip type');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
             });
-    })();
-});
+        });
+
+
+        // Custom Bootstrap validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })();
+    });
+
 
 // (function () {
 //             'use strict';
@@ -499,7 +542,7 @@ function calculateRideHours() {
 //     // Existing JavaScript for form validation and handling
 
 //     document.getElementById('getLastTripBtn').addEventListener('click', function() {
-//         fetch('{% url "get_last_trip_details" %}')
+//         fetch('/get_last_trip_details')
 //             .then(response => response.json())
 //             .then(data => {
 //                 if (data.error) {
@@ -623,9 +666,6 @@ document.addEventListener("DOMContentLoaded", function() {
     
 });
 </script>
-
-
-
 
 
 
