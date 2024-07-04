@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
-from .models import UserProfile
+from .models import *
 from django.contrib.auth.models import User
 import re
 from django.contrib.auth import authenticate, login as auth_login 
@@ -106,14 +106,13 @@ from datetime import datetime
 def add_trip_details(request):
     if request.method == 'POST':
         trip_type = request.POST.get('trip_type') 
-
+        user = request.user
         if trip_type == 'on':
             trip_type = 'hr'
         
         if trip_type == None:
             trip_type = 'km'
         
-        print(trip_type)
         trip_no = request.POST.get('trip_no')
         date = request.POST.get('date')
         vehicle_number = request.POST.get('vehicle_number')
@@ -122,25 +121,30 @@ def add_trip_details(request):
         guest_name = request.POST.get('guest_name')
         fixed_charge = request.POST.get('fixed_charge')
         max_km = request.POST.get('max_km')
+        if max_km == '':
+            max_km = None
+        max_hr = request.POST.get('max_hour')
+        if max_hr == '':
+            max_hr = None
         extra_charge = request.POST.get('extra_charge')
         strt_km = request.POST.get('strt_km')
         end_km = request.POST.get('end_km')
-        strt_time = request.POST.get('strt_time')
-        if strt_time == '':
-            strt_time = None
-        print(strt_time)
-        ride_hours = request.POST.get('ride_hours')
-        if ride_hours == '':
-            ride_hours = None
-        print(ride_hours)
-        end_time = request.POST.get('end_time')
-        if end_time == '':
-            end_time = None
-        print(end_time)
+
+
+        strt_time = request.POST.getlist('strt_time[]')
+        
+        ride_hours = request.POST.getlist('ride_hours[]')
+   
+        end_time = request.POST.getlist('end_time[]')
+
         strt_place = request.POST.get('strt_place')
         time = request.POST.get('time')
         destination = request.POST.get('destination')
+        if destination == None:
+            destination = None
         time_arrival = request.POST.get('time_arrival')
+        if time_arrival == '':
+            time_arrival = None
 
         arrival_date = request.POST.get('arrival_date')
         if arrival_date == '':
@@ -149,9 +153,18 @@ def add_trip_details(request):
         if trip_days == '':
             trip_days = None
             
-        toll = request.POST.get('toll')
-        guidefee = request.POST.get('guidefee')
-        add_charges = request.POST.get('add_charges')
+        toll = tuple(request.POST.getlist('toll[]'))
+        permit = request.POST.get('permit')
+        parking = tuple(request.POST.getlist('pf[]'))
+        print(parking)
+        entrance = request.POST.get('entrance')
+        guidefee = tuple(request.POST.getlist('guidefee[]'))
+        add_charges = tuple(request.POST.getlist('add_charges[]'))
+        other_desc = tuple(request.POST.getlist('other_desc[]'))
+        print(other_desc)
+        print(add_charges)
+        if other_desc == '':
+            other_desc = None
         tot_charge = request.POST.get('tot_charge')
         advance = request.POST.get('advance')
         balance = request.POST.get('balance')
@@ -170,7 +183,6 @@ def add_trip_details(request):
             'Max kilometer': max_km,
             'Extra charge per km/hour': extra_charge,
             'Starting place': strt_place,
-            'Time': time,
             'Total charge': tot_charge,
             'Balance amount': balance
         }
@@ -185,39 +197,102 @@ def add_trip_details(request):
             return redirect(reverse('add_trip_details'))
 
         try:
-            # Create Trip object with parsed values
             trip = Trip.objects.create(
+                user=user,
                 trip_type=trip_type,
                 trip_no=trip_no,
-                date=parse_date(date) if date else None,
+                date=parse_date(date),
                 vehicle_number=vehicle_number,
                 vehicle_name=vehicle_name,
                 driver_name=driver_name,
                 guest_name=guest_name,
                 fixed_charge=int(fixed_charge) if fixed_charge else 0,
                 max_km=int(max_km) if max_km else 0,
+                max_hr=float(max_hr) if max_hr else 0,
                 extra_charge=float(extra_charge) if extra_charge else 0,
                 strt_km=int(strt_km) if strt_km else None,
                 end_km=int(end_km) if end_km else None,
-                strt_time=parse_time(strt_time) if strt_time else None,
-                end_time=parse_time(end_time) if end_time else None,
-                ride_hours=float(ride_hours) if ride_hours else None,
                 strt_place=strt_place,
-                time=parse_time(time) if time else None,
+                time=parse_time(time),
                 destination=destination if destination else None,
                 time_arrival=parse_time(time_arrival) if time_arrival else None,
                 arrival_date=parse_date(arrival_date) if arrival_date else None,
-                trip_days=int(trip_days) if trip_days else None,
-                toll=float(toll) if toll else 0,
-                guidefee=float(guidefee) if guidefee else 0,
-                add_charges=float(add_charges) if add_charges else 0,
+                trip_days=trip_days if trip_days else 0,
+                
+                permit = float(permit) if permit else 0,
+                entrance=float(entrance) if entrance else 0,
+                
                 tot_charge=float(tot_charge),
                 advance=float(advance) if advance else 0,
                 balance=float(balance)
             )
             trip.save()
-            messages.success(request, "Trip details added successfully!")
+
+            
+            if len(strt_time) == len(end_time) == len(ride_hours):
+                mapped = zip(strt_time,end_time,ride_hours)
+                mapped = list(mapped)
+                for ele in mapped:
+                    if ele[0] == '':
+                        strt = None
+                    else:
+                        strt = None
+                        for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S%z'):
+                            try:
+                                strt = datetime.strptime(ele[0], fmt)
+                                break
+                            except ValueError:
+                                continue
+                    if ele[1] == '':
+                        end = None
+                        
+                    else:
+                        end = None
+                        for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S%z'):
+                            try:
+                                end = datetime.strptime(ele[1], fmt)
+                                break
+                            except ValueError:
+                                continue
+                    if ele[2] == '':
+                        amt = None
+                    else:
+                        amt = float(ele[2])
+
+                    TripAdditionalData.objects.create(trip=trip,charge_type='Hour',start_time=strt,end_time=end,amount=amt)
+
+            
+
+            if len(other_desc)==len(add_charges):
+                mapped=zip(other_desc,add_charges)
+                mapped=list(mapped)
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='other_charges',amount=ele[1],desc=ele[0])
+                    
+            print(parking)
+            if parking:
+                mapped=zip(parking)
+                mapped=list(mapped)
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='parking',amount=ele[0])
+            
+            if toll:
+                mapped=zip(toll)
+                mapped=list(mapped)
+                print(mapped)
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='toll',amount=ele[0])   
+
+            if guidefee:
+                mapped=zip(guidefee)
+                mapped=list(mapped)
+                print(mapped)
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='guidefee',amount=ele[0])
+            messages.success(request, "Trip details added successfully!")      
+            
             return redirect(reverse('add_trip_details'))
+        
         except ValueError as e:
             messages.error(request, str(e))
             return redirect(reverse('add_trip_details'))
@@ -225,8 +300,8 @@ def add_trip_details(request):
             messages.error(request, str(e))
             return redirect(reverse('add_trip_details'))
 
-    if Trip.objects.exists():
-        latest_trip = Trip.objects.latest('trip_no').trip_no
+    if Trip.objects.filter(user=request.user).exists():
+        latest_trip = Trip.objects.filter(user=request.user).latest('trip_no').trip_no
         latest_trip_number = f'TR{int(latest_trip[2:]) + 1:03d}'
     else:
         latest_trip_number = 'TR001'
@@ -244,15 +319,55 @@ def all_trip_table(request):
 
 def trip_view(request, id):
     trip = get_object_or_404(Trip, id=id)
+    additional_data = TripAdditionalData.objects.filter(trip=trip)
+    other_charge_list = []
+    parking_charge_list = []
+    toll_charge_list = []
+    guide_fee_list = []
+    strt_time_data = []
+    end_time_data = []
+
+    for i in additional_data:
+        if i.charge_type == 'Hour':
+            strt_time_data.append(i)
+
+    for i in additional_data:
+        if i.charge_type == 'toll':
+            toll_charge_list.append(i)
+
+    for i in additional_data:
+        if i.charge_type == 'other_charges':
+            other_charge_list.append(i)
+        print(other_charge_list)
+
+    for i in additional_data:
+        if i.charge_type =='parking':
+            parking_charge_list.append(i)
+
+    for i in additional_data:
+        if i.charge_type == 'guidefee':
+            guide_fee_list.append(i)
     
     
     distance_travelled = None
     if trip.strt_km is not None and trip.end_km is not None:
         distance_travelled = trip.end_km - trip.strt_km
+
+    hours_travelled = 0
+    for i in additional_data:
+        if i.charge_type == 'Hour':
+            if i.amount is not None:  # Check if i.amount is not None
+                hours_travelled += i.amount
     
     context = {
         'trip': trip,
-        'distance_travelled': distance_travelled
+        'distance_travelled': distance_travelled,
+        'other_charge_list':other_charge_list,
+        'parking_charge_list':parking_charge_list,
+        'toll_charge_list':toll_charge_list,
+        'guide_fee_list':guide_fee_list,
+        'hours_travelled':hours_travelled,
+        'strt_time_data':strt_time_data
     }
     
     return render(request, 'trip_view.html', context=context)
@@ -270,9 +385,17 @@ def delete_trip(request,id):
     messages.info(request,'{{trip.trip_no}} Deleted successfully')
     return redirect('all_trip_table')
 
+
+
+
+from django.core.serializers import serialize
 def get_last_trip_details(request):
     try:
         latest_trip = Trip.objects.latest('trip_no')
+        additional_data = TripAdditionalData.objects.filter(trip=latest_trip)
+        additional_data_json = serialize('json', additional_data)
+
+        print(latest_trip.trip_type)
         trip_data = {
             'trip_type': latest_trip.trip_type,
             'trip_no': latest_trip.trip_no,
@@ -286,9 +409,9 @@ def get_last_trip_details(request):
             'guest_name': latest_trip.guest_name,
             'strt_km': latest_trip.strt_km,
             'end_km': latest_trip.end_km,
-            'strt_time':latest_trip.strt_time,
-            'end_time':latest_trip.end_time,
-            'ride_hours':latest_trip.ride_hours,
+            'strt_time': latest_trip.strt_time,
+            'end_time': latest_trip.end_time,
+            'ride_hours': latest_trip.ride_hours,
             'strt_place': latest_trip.strt_place,
             'time': latest_trip.time,  
             'destination': latest_trip.destination,
@@ -296,14 +419,21 @@ def get_last_trip_details(request):
             'arrival_date': latest_trip.arrival_date,
             'trip_days': latest_trip.trip_days,
             'toll': latest_trip.toll,
+            'permit': latest_trip.permit,
             'guidefee': latest_trip.guidefee,
-            'add_charges': latest_trip.add_charges,
+            'parking': latest_trip.parking,
+            'entrance': latest_trip.entrance,
             'tot_charge': latest_trip.tot_charge,
             'advance': latest_trip.advance,
             'balance': latest_trip.balance,
         }
-        print(trip_data)
-        return JsonResponse(trip_data)
+
+        response_data = {
+            'trip_data': trip_data,
+            'additional_data': json.loads(additional_data_json)
+        }
+
+        return JsonResponse(response_data)
     except Trip.DoesNotExist:
         response_data = {
             'error': 'No trips found in the database.'
@@ -311,15 +441,79 @@ def get_last_trip_details(request):
         return JsonResponse(response_data, status=404)
 
 
-
-
+from django.core.serializers.json import DjangoJSONEncoder
 def update_last_trip(request):
-    return render(request,'update_details.html')
+        latest_trip = Trip.objects.latest('trip_no')
+        additional_data = TripAdditionalData.objects.filter(trip=latest_trip)
+        other_charge_list = []
+        parking_charge_list = []
+        toll_charge_list = []
+        guide_fee_list = []
+        hours_total = []
+
+        hours_total = []
+        for i in additional_data:
+            if i.charge_type == 'Hour':
+                if i.start_time is not None and i.end_time is not None and i.amount is not None:
+                    hours_total.append([i.start_time.strftime('%Y-%m-%dT%H:%M'), i.end_time.strftime('%Y-%m-%dT%H:%M'), i.amount])
+
+
+        for i in additional_data:
+            if i.charge_type == 'toll':
+                toll_charge_list.append(i)
+        print(toll_charge_list)
+        for i in additional_data:
+            if i.charge_type == 'other_charges':
+                other_charge_list.append(i)
+        print(other_charge_list)
+
+        for i in additional_data:
+            if i.charge_type =='parking':
+                parking_charge_list.append(i)
+        print(parking_charge_list)
+        for i in additional_data:
+            if i.charge_type == 'guidefee':
+                guide_fee_list.append(i)
+        print(guide_fee_list)
+        latest_trip_json = json.dumps({
+            'trip_type': latest_trip.trip_type,
+            'trip_no': latest_trip.trip_no,
+            'date': latest_trip.date.strftime('%Y-%m-%d'),  
+            'vehicle_name': latest_trip.vehicle_name,
+            'vehicle_number': latest_trip.vehicle_number,
+            'fixed_charge': latest_trip.fixed_charge,
+            'max_km': latest_trip.max_km,
+            'max_hour':latest_trip.max_hr,
+            'extra_charge': latest_trip.extra_charge,
+            'driver_name': latest_trip.driver_name,
+            'guest_name': latest_trip.guest_name,
+            'strt_km': latest_trip.strt_km,
+            'end_km': latest_trip.end_km,
+
+            'strt_place': latest_trip.strt_place,
+            'time': latest_trip.time,  
+            'destination': latest_trip.destination,
+            'time_arrival': latest_trip.time_arrival,
+            'arrival_date': latest_trip.arrival_date,
+            'trip_days': latest_trip.trip_days,
+             
+            'permit': latest_trip.permit,
+            'guide_fee' : latest_trip.guidefee,
+           
+            'entrance': latest_trip.entrance,
+            'tot_charge': latest_trip.tot_charge,
+            'advance': latest_trip.advance,
+            'balance': latest_trip.balance,
+        }, cls=DjangoJSONEncoder)
+
+        print(latest_trip_json)
+        return render(request,'update_details.html',{'latest_trip':latest_trip_json,'other_charge_list':other_charge_list,'parking_charge_list':parking_charge_list,'toll_charge_list':toll_charge_list,'guide_fee_list':guide_fee_list,'hours_total':hours_total})
 
 
 
 
 
+from datetime import datetime
 
 
 import json
@@ -328,70 +522,140 @@ from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def update_trip(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        trip_id = data.get('trip_no')
+        
+            
+        
+        
+        trip_id = request.POST.get('trip_no')
 
         try:
             trip = Trip.objects.get(trip_no=trip_id)
-            trip.date = data.get('date')
-            trip.vehicle_number = data.get('vehicle_number')
-            trip.vehicle_name = data.get('vehicle_name')
-            trip.fixed_charge = float(data.get('fixed_charge'))
-            trip.max_km = int(data.get('max_km'))
-            trip.extra_charge = float(data.get('extra_charge'))
-            trip.driver_name = data.get('driver_name')
-            trip.guest_name = data.get('guest_name')
-            trip.start_km = data.get('start_km')
-            end_km = data.get('end_km')
+            trip.date = request.POST.get('date')
+            trip.vehicle_number = request.POST.get('vehicle_number')
+            trip.vehicle_name = request.POST.get('vehicle_name')
+            trip.fixed_charge = float(request.POST.get('fixed_charge'))
+            trip.max_km = int(request.POST.get('max_km'))
+            trip.extra_charge = float(request.POST.get('extra_charge'))
+            trip.driver_name = request.POST.get('driver_name')
+            trip.guest_name = request.POST.get('guest_name')
+            trip.start_km = request.POST.get('start_km')
+            end_km = request.POST.get('end_km')
             trip.end_km = float(end_km) if end_km not in [None, ''] else 0
-            trip.strt_place = data.get('strt_place')
-            trip.time = data.get('time')
+            trip.strt_place = request.POST.get('strt_place')
+            
+            if request.POST.get('time') == '':
+                trip.time = None
+            else:
+                trip.time = request.POST.get('time')
 
-            if data.get('destination') == '':
+            if request.POST.get('destination') == '':
                 trip.destination = None
             else:
-                trip.destination = data.get('destination')
+                trip.destination = request.POST.get('destination')
 
-            if data.get('strt_time') == '':
-                trip.strt_time = None
-            else:
-                trip.strt_time = data.get('strt_time')
-
-            if data.get('end_time') == '':
-                trip.end_time = None
-            else:
-                trip.end_time = data.get('end_time')
             
-            if data.get('ride_hours') == '':   
-                trip.ride_hours = None
-            else:  
-                trip.ride_hours = data.get('ride_hours')
+                
+            
+            strt_time = request.POST.getlist('strt_time[]')
+            
 
-            if data.get('time_arrival') == '':
+            end_time = request.POST.getlist('end_time[]')
+           
+            
+            ride_hours = request.POST.getlist('ride_hours[]')
+
+            if request.POST.get('time_arrival') == '':
                 trip.time_arrival = None
             else:
-                trip.time_arrival = data.get('time_arrival')
+                trip.time_arrival = request.POST.get('time_arrival')
 
-            if data.get('arrival_date') == '':
+            if request.POST.get('arrival_date') == '':
                 trip.arrival_date = None
             else:
-                trip.arrival_date = data.get('arrival_date')
-            if data.get('trip_days') == '':
+                trip.arrival_date = request.POST.get('arrival_date')
+            if request.POST.get('trip_days') == '':
                 trip.trip_days = None
             else:
-                trip.trip_days = int(data.get('trip_days'))
-            trip.toll = float(data.get('toll'))
-            trip.guidefee = float(data.get('guidefee'))
-            trip.add_charges = float(data.get('add_charges'))
-            trip.tot_charge = float(data.get('tot_charge'))
-            trip.advance = float(data.get('advance'))
-            trip.balance = float(data.get('balance'))
+                trip.trip_days = int(request.POST.get('trip_days'))
+            
+            guidefee = request.POST.getlist('guide[]')
+            toll = request.POST.getlist('tl[]')
+            trip.permit = request.POST.get('permit')
+            trip.entrance = request.POST.get('entry')
+            
+            parking = request.POST.getlist('parking[]')
+            other_desc = request.POST.getlist('other_desc[]')
+            add_charges = request.POST.getlist('add_charges[]')
+            
+            trip.tot_charge = float(request.POST.get('tot_charge'))
+            trip.advance = float(request.POST.get('advance'))
+            trip.balance = request.POST.get('balance')
             trip.save()
+            TripAdditionalData.objects.filter(trip=trip).delete()
+
+            if len(strt_time) == len(end_time) == len(ride_hours):
+                mapped = zip(strt_time,end_time,ride_hours)
+                mapped = list(mapped)
+                for ele in mapped:
+                    if ele[0] == '':
+                        strt = None
+                    else:
+                        strt = None
+                        for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S%z'):
+                            try:
+                                strt = datetime.strptime(ele[0], fmt)
+                                break
+                            except ValueError:
+                                continue
+                    if ele[1] == '':
+                        end = None
+                        
+                    else:
+                        end = None
+                        for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S%z'):
+                            try:
+                                end = datetime.strptime(ele[1], fmt)
+                                break
+                            except ValueError:
+                                continue
+                        print(datetime.strptime(ele[1], '%Y-%m-%dT%H:%M'))
+                    if ele[2] == '':
+                        amt = None
+                    else:
+                        amt = float(ele[2])
+
+                    TripAdditionalData.objects.create(trip=trip,charge_type='Hour',start_time=strt,end_time=end,amount=amt)
+
+            if len(other_desc)==len(add_charges):
+                mapped=zip(other_desc,add_charges)
+                mapped=list(mapped)
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='other_charges',amount=ele[1],desc=ele[0])
+                    
+            print(parking)
+            if parking:
+                mapped=zip(parking)
+                mapped=list(mapped)
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='parking',amount=ele[0])
+            
+            if toll:
+                mapped=zip(toll)
+                mapped=list(mapped)
+                
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='toll',amount=ele[0])   
+
+            if guidefee:
+                mapped=zip(guidefee)
+                mapped=list(mapped)
+                
+                for ele in mapped:
+                    TripAdditionalData.objects.create(trip = trip,charge_type='guidefee',amount=ele[0])
 
             return JsonResponse({'status': 'success', 'message': 'Trip details updated successfully!'})
         except Trip.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Trip not found.'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
 
 

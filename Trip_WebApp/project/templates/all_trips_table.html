@@ -18,12 +18,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'home' %}">Home</a>
-                    </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'add_trip' %}">Add Trip</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'update_last_trip' %}" class="nav-link">Get Last Trip</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Logout ({{user.username}})</a>
@@ -57,7 +57,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i in trip %}
+                    {% if user.is_authenticated %}
+                    {% for i in user.trips.all %}
                     <tr>
                         <td>{{i.trip_no}}</td>
                         <td>{{i.driver_name}}</td>
@@ -71,6 +72,11 @@
                         </td>
                     </tr>
                     {% endfor %}
+                    {% else %}
+
+                    <p>Add data</p>
+
+                    {% endif %}
                 </tbody>
             </table>
         </div>

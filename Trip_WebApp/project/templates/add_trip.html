@@ -1,19 +1,26 @@
 
-
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Trip</title>
-    <link rel="shortcut icon" type="image/png" href="/static/images/touring.png">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/touring.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://bootswatch.com/5/flatly/bootstrap.min.css">
    
 
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
+
+        .fade-out {
+            opacity: 1;
+            transition: opacity 1s ease-out;
+        }
+        .hidden {
+            opacity: 0;
+        }
         .previous-trip {
             float: right;
             margin-bottom: 10px;
@@ -90,14 +97,17 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand" href="/"><b>Take A Trip</b></a>
+            <a class="navbar-brand" href="{% url 'home' %}"><b>Take A Trip</b></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarColor01">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/all_trip_table">Trip Details</a>
+                        <a class="nav-link" href="{% url 'all_trip_table' %}">Trip Details</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -108,7 +118,11 @@
             <div class="col-md-7">
             
                 <div class="messages">
-                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success fade-out">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             
                 <div class="card shadow-lg mx-3 my-3 py-3" style="background-color: #152733; border-color: white; border-radius: 18px; border-width: 3px;">
@@ -116,8 +130,8 @@
                         <h3 class="card-title" style="color: white;">Enter Trip Details</h3>
                         <p>Add your trip details here..</p><br>
 
-                        <form id="tripForm" method="post" action="/add_trip_details">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="T7axz5TEYhhGgofZtY7XulcmXrrIV0jMkANPZcEHC7qgPxBYO4xe3DatKn3TRUOy">
+                        <form id="tripForm" method="post" action="{% url 'add_trip_details' %}">
+                            {% csrf_token %}
                             <div class="mb-3 d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="switch-container">
@@ -130,15 +144,15 @@
                                     </div>
                                     <div class="invalid-feedback">Trip type is required</div>
                                 </div>
-                                <a href="/update_last_trip_page" class="btn btn-outline-secondary">Get Last Trip</a>
+                                <a href="{% url 'update_last_trip' %}" class="btn btn-outline-secondary">Get Last Trip</a>
                             </div>
                             
                             <div class="mb-3 row">
                                 
                                 <div class="col">
                                     <label for="">Trip no</label>
-                                    <input type="hidden" id="trip_no_hidden" name="trip_no" value="TR001">
-                                    <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="TR001" readonly>
+                                    <input type="hidden" id="trip_no_hidden" name="trip_no" value="{{ latest_trip_number }}">
+                                    <input class="form-control" type="text" id="trip_no_display" placeholder="Trip Number*" value="{{ latest_trip_number }}" readonly>
                                 </div>
                                 
                                 <div class="col">
@@ -178,61 +192,72 @@
                             </div>
                             
                             <div class="mb-3 row">
-                                
+                                <div class="col" id="maxKmField">
+                                    <label for="">Max km</label>
+                                    <input class="form-control" type="number" id="max_km" name="max_km" value="0" placeholder="Max Kilometer*" aria-required="true">
+                                </div>
+                                <div class="col" id="maxHourField" style="display:none;">
+                                    <label for="">Max hour</label>
+                                    <input class="form-control" type="number" id="max_hour" name="max_hour" value="0" placeholder="Max Hour*" aria-required="true">
+                                </div>
                                 <div class="col">
                                     <label for="">Fixed charge</label>
-                                    <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required >
-                                </div>
-                                <div class="col"><label for="">Max km</label>
-                                    <input class="form-control" type="number" id="max_km" name="max_km" placeholder="Max Kilometer*" aria-required="true" >
+                                    <input class="form-control" type="number" id="fixed_charge" name="fixed_charge" placeholder="Fixed Charge*" aria-required="true" required>
                                 </div>
                             </div>
-    
+                            
                             <div class="mb-3">
                                 <label for="">Extra charge</label>
-                                <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km/ hr*" aria-required="true" >
+                                <input class="form-control" type="number" id="extra_charge" name="extra_charge" placeholder="Extra charge per km/ hr*" aria-required="true">
                             </div>
-                            
-                        
-                            
+
                             <div class="mb-3 row" id="kilometerFields">
                                 <div class="col">
                                     <label for="">Start km</label>
-                                    <input class="form-control" type="number" id="strt_km" name="strt_km" placeholder="Starting Kilometer" value="0" required>
+                                    <input class="form-control" type="number" id="strt_km" name="strt_km" placeholder="Starting Kilometer" value="0" required oninput="calculateTotalKm()">
                                     <div class="valid-feedback">Starting kilometer is valid!</div>
                                     <div class="invalid-feedback">Starting kilometer is required</div>
                                 </div>
                                 <div class="col">
                                     <label for="">End km</label>
-                                    <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer" >
+                                    <input class="form-control" type="number" id="end_km" name="end_km" placeholder="Ending Kilometer" oninput="calculateTotalKm()">
                                     <div class="valid-feedback">Ending kilometer is valid!</div>
                                     <div class="invalid-feedback">Ending kilometer is required</div>
                                 </div>
+                            
+                                <div class="col">
+                                    <label for="kms">Total Km</label>
+                                    <input class="form-control" type="number" id="tot_km" name="total_km" placeholder="Total Kilometer" readonly>
+                                </div>
                             </div>
                             
-                            
-                                <div class="mb-3 row" id="hourFields">
-                                    <div class="text-center mt-1">
-                                        <p>Ride Hour</p>
-                                        <hr>
-                                    </div>
+                            <div class="mb-3" id="hourFields">
+                                <div class="text-center mt-1">
+                                    <p>Ride Hour</p>
+                                    <hr>
+                                </div>
+                                <div class="row">
                                     <div class="col">
                                         <label for="strt_time">Start*</label>
-                                        <input class="form-control" type="datetime-local" id="strt_time" name="strt_time" placeholder="Starting Time" required>
+                                        <input class="form-control" type="datetime-local" id="strt_time" name="strt_time[]" placeholder="Starting Time" required>
                                         <div class="valid-feedback">Starting time is valid!</div>
                                         <div class="invalid-feedback">Starting time is required</div>
                                     </div>
                                     <div class="col">
                                         <label for="end_time">End*</label>
-                                        <input class="form-control" type="datetime-local" id="end_time" name="end_time" placeholder="Ending Time" >
+                                        <input class="form-control" type="datetime-local" id="end_time" name="end_time[]" placeholder="Ending Time" >
                                         <div class="valid-feedback">Ending time is valid!</div>
                                         <div class="invalid-feedback">Ending time is required</div>
                                     </div>
-                                    <div class="col">
+                                    <div class="">
                                         <label for="ride_hours">Hours</label>
-                                        <input class="form-control" type="number" id="ride_hours" name="ride_hours" placeholder="Ride Hours" readonly>
+                                        <input class="form-control" type="text" id="ride_hours" name="ride_hours[]" placeholder="Ride Hours" readonly>
+                                    </div>
+                                    <div class=" mt-4">
+                                        <button class="btn btn-light add-hour" type="button" onclick="addHourField()">Hour +</button>
                                     </div>
                                 </div>
+                            </div>
                             
                             
                             
@@ -243,9 +268,9 @@
                                     <div class="valid-feedback">Starting place is valid!</div>
                                     <div class="invalid-feedback">Starting place is required</div>
                                 </div>
-                                <div class="col">
+                                <div class="col" id="hide_start_time">
                                     <label for="time">Time*</label>
-                                    <input class="form-control" type="time" id="time" name="time" placeholder="Time*" required>
+                                    <input class="form-control" type="time" id="time" name="time" placeholder="Time*">
                                     <div class="valid-feedback">Time is valid!</div>
                                     <div class="invalid-feedback">Time is required</div>
                                 </div>
@@ -254,13 +279,13 @@
                             <div class="mb-3 row">
                                 <div class="col">
                                     <label for="destination">Destination</label>
-                                    <input class="form-control" type="text" id="destination" name="destination" placeholder="Destination*">
+                                    <input class="form-control" type="text" id="destination" name="destination" placeholder="Destination*" value="Destination">
                                     <div class="valid-feedback">Destination is valid!</div>
                                     <div class="invalid-feedback">Destination is required</div>
                                 </div>
-                                <div class="col">
+                                <div class="col" id="hide_time_arrival">
                                     <label for="time_arrival">Time of Arrival</label>
-                                    <input class="form-control" type="time" id="time_arrival" name="time_arrival" placeholder="Time of Arrival*">
+                                    <input class="form-control" type="time" id="time_arrival" name="time_arrival" placeholder="Time of Arrival*" >
                                     <div class="valid-feedback">Time of arrival is valid!</div>
                                     <div class="invalid-feedback">Time of arrival is required</div>
                                 </div>
@@ -275,7 +300,7 @@
                                 </div>
                                 <div class="col-6">
                                     <label for="trip_days">Trip Days*</label>
-                                    <input class="form-control" type="number" id="trip_days" name="trip_days" step="0" placeholder="No of days*" readonly>
+                                    <input class="form-control" type="number" id="trip_days" name="trip_days" step="0" placeholder="No of days*" >
                                     <div class="valid-feedback">Number of days is valid!</div>
                                     <div class="invalid-feedback">Number of days is required</div>
                                 </div>
@@ -284,50 +309,89 @@
                             <hr>
                             
                             <div class="mb-3">
-                        
+                                <p class="text-center">Additional charges*</p>
                                 <div id="inputContainer">
                                     <label for="toll">Toll*</label>
                                     <div class="input-group mb-2">
-                                        <input class="form-control" type="number" name="toll" value="0" placeholder="Toll*">
+                                        <input class="form-control" type="number" name="toll[]" value="0" placeholder="Toll*" id="toll-input">
+                                        
                                     </div>
                                 </div>
                                 <button class="btn btn-light add-btn mt-2" type="button">Toll +</button>
                             </div>
                             
-                            <hr style="height: 3px;">
+                            <div class="mb-3">
+                                <div id="inputContainer5">
+                                    <label for="permit">Permit</label>
+                                    <div class="input-group mb-2">
+                                        <input class="form-control" type="number" value="0" name="permit" placeholder="Permit" id="permit-input">
+                                    </div>
+                                </div>
+                            </div>
                             
                             <div class="mb-3">
                                 <div id="inputContainer1">
                                     <label for="">Guide Fee*</label>
                                     <div class="input-group mb-2">
-                                        <input class="form-control" type="number" value="0" name="guidefee" placeholder="Guide Fee*">
+                                        <input class="form-control" type="number" value="0" name="guidefee[]" placeholder="Guide Fee*" id="guidefee-input">
+                                       
                                     </div>
                                 </div>
                                 <button class="btn btn-light add-btn2 mt-2" type="button">Fee +</button>
                             </div>
                             
+                            
+
                             <div class="mb-3">
-                                <div id="inputContainer2">
-                                    <label for="add_charges">Extra expenses*</label>
+                                <div id="inputContainer4">
+                                    <label for="entrance">Entrance</label>
                                     <div class="input-group mb-2">
-                                        <input class="form-control" type="number" value="0" name="add_charges" placeholder="Extra expenses*">
+                                        <input class="form-control" type="number" value="0" name="entrance" placeholder="Entrance fee" id="entrance-input">
                                     </div>
                                 </div>
-                                <button class="btn btn-light add-btn3 mt-2" type="button">Add +</button>
                             </div>
+
+                            <div class="mb-3">
+                                <div id="inputContainer3">
+                                    <label for="">Parking Fee*</label>
+                                    <div class="input-group mb-2">
+                                        <input class="form-control" type="number" value="0" name="pf[]"  placeholder="Parking Fee*" id="parkingfee-input">
+                                        
+                                    </div>
+                                </div>
+                                <button class="btn btn-light add-btn4 mt-2" type="button">Parking +</button>
+                            </div>
+                            
+                            <hr>
+
+                            <div class="mb-3">
+                                <div id="inputContainer2">
+                                    <label for="add_charges">Other charges</label>
+                                    
+                                    <div class="input-group mb-2">
+                                        <input class="form-control" type="number" value="0" name="add_charges[]" placeholder="Other charge amount" id="add-charges-input">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <input class="form-control" type="text" name="other_desc[]" placeholder="Other charges description">
+                                    </div>
+                            
+                                </div>
+                                <button class="btn btn-light add-btn3 mt-2" type="button">Other charge +</button>
+                            </div>
+                            
                             
                             <hr style="height: 3px;">
                             <div class="mb-3">
                                 <h5 class="text-center">Payment details</h5>
-                                <input class="form-control" type="number" id="tot_charge" name="tot_charge" placeholder="Total Charge*" >
+                                <input class="form-control" type="number" step="any" id="tot_charge" name="tot_charge" placeholder="Total Charge*" >
                             </div>
     
                             <div class="mb-3">
-                                <input class="form-control" type="number" id="advance" name="advance" placeholder="Advance*" value="0.00">
+                                <input class="form-control" type="number" step="any" id="advance" name="advance" placeholder="Advance*" value="0.00">
                             </div>
     
                             <div class="mb-3">
-                                <input class="form-control" type="number" id="balance" name="balance" placeholder="Balance amount*" >
+                                <input class="form-control" type="number" step="any" id="balance" name="balance" placeholder="Balance amount*" >
                             </div>
                             <div class="mb-3">
                                 <button class="btn btn-primary" type="submit">Submit Trip Details</button>
@@ -342,113 +406,244 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
 
+document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.fade-out');
+
+            setTimeout(function() {
+                messages.forEach(function(message) {
+                    message.classList.add('hidden');
+                });
+            }, 4000);
+            setTimeout(function() {
+                messages.forEach(function(message) {
+                    message.remove();
+                });
+            }, 5000); 
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+        function setDefaultValues() {
+            const destinationInput = document.getElementById('destination');
+            const tripDaysInput = document.getElementById('trip_days');
+            const timeInput = document.getElementById('time');
+            if (destinationInput.value.trim() === '') {
+                destinationInput.value = '';
+            }
+
+            if (tripDaysInput.value.trim() === '') {
+                tripDaysInput.value = '0';
+            }
+
+            if (timeInput.value === '') {
+                timeInput.value = '';
+            }
+        }
+        setDefaultValues();
+    });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    var inputIds = ['toll-input', 'guidefee-input', 'add-charges-input', 'entrance-input', 'parkingfee-input', 'advance', 'permit-input','strt_km','max_km','max_hour','destination'];
+    
+    inputIds.forEach(function(inputId) {
+        var inputElement = document.getElementById(inputId);
+        if (inputElement) {
+            inputElement.addEventListener('focus', function() {
+                if (this.value === '0' || this.value === '0.00' || this.value === 'Destination')  {
+                    this.value = '';
+                }
+            });
+        }
+    });
+});
+
 
 
 (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var form = document.getElementById('vehicleForm');
-                form.addEventListener('submit', function(event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
+    'use strict';
+    window.addEventListener('load', function() {
+        var form = document.getElementById('vehicleForm');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
 
-                var vehicleNumberInput = document.getElementById('vehicle_number');
-                vehicleNumberInput.addEventListener('input', function() {
-                    var pattern = /^[A-Z]{2}\d{2}\s?[A-Z]{1,2}\s?\d{1,4}$/;
-                    if (pattern.test(vehicleNumberInput.value)) {
-                        vehicleNumberInput.setCustomValidity('');
-                    } else {
-                        vehicleNumberInput.setCustomValidity('Invalid');
-                    }
-                });
-            }, false);
-        })();
-
-
-
-
-
+        var vehicleNumberInput = document.getElementById('vehicle_number');
+        vehicleNumberInput.addEventListener('input', function() {
+            // Pattern for XX 1X 1111 or XX 11 XX 1111
+            var pattern = /^[A-Z]{2}\s?\d{1,2}\s?[A-Z]{0,2}\s?\d{2,4}$/;
+            if (pattern.test(vehicleNumberInput.value)) {
+                vehicleNumberInput.setCustomValidity('');
+            } else {
+                vehicleNumberInput.setCustomValidity('Invalid format required pattern is: XX 1X 1111 or XX 11 XX 1111');
+            }
+        });
+    }, false);
+})();
 
 
         function calculateTotalCharge() {
-        var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+    var fixedCharge = parseFloat(document.getElementById('fixed_charge').value) || 0;
+    var extraChargePerUnit = parseFloat(document.getElementById('extra_charge').value) || 0;
+    var totalCharge = fixedCharge;
+    var isHoursTrip = document.getElementById('trip_type').checked; 
+    if (!isHoursTrip) { // Km calculations
         var maxKm = parseFloat(document.getElementById('max_km').value) || 0;
-        var extraCharge = parseFloat(document.getElementById('extra_charge').value) || 0;
         var startKm = parseFloat(document.getElementById('strt_km').value) || 0;
         var endKm = parseFloat(document.getElementById('end_km').value) || 0;
 
-        // Calculate total kilometers traveled
         var totalKmTraveled = endKm - startKm;
+        var extraKmCharges = 0;
 
-        // Calculate extra charges if applicable
-        var extraCharges = 0;
         if (totalKmTraveled > maxKm) {
-            extraCharges = (totalKmTraveled - maxKm) * extraCharge;
+            extraKmCharges = (totalKmTraveled - maxKm) * extraChargePerUnit;
         }
 
-        // Calculate total charge
-        var totalCharge = fixedCharge + extraCharges;
+        totalCharge += extraKmCharges;
 
-        // Add toll, guide fee, and additional charges
-        document.querySelectorAll('#inputContainer input[name="toll"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-        document.querySelectorAll('#inputContainer1 input[name="guidefee"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
-        document.querySelectorAll('#inputContainer2 input[name="add_charges"]').forEach(input => {
-            totalCharge += parseFloat(input.value) || 0;
-        });
+    } else { // Hours calculations
+        var maxHours = parseFloat(document.getElementById('max_hour').value) || 0;
+        var rideHours = parseFloat(document.getElementById('ride_hours').value) || 0;
+        var extraHourCharges = 0;
 
-        document.getElementById('tot_charge').value = totalCharge.toFixed(2);
-        calculateBalance();
+        if (rideHours > maxHours) {
+            extraHourCharges = (rideHours - maxHours) * extraChargePerUnit;
+        }
+
+        totalCharge += extraHourCharges;
     }
 
-    // Calculate balance
-    function calculateBalance() {
-        var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
-        var advance = parseFloat(document.getElementById('advance').value) || 0;
-        var balance = totalCharge - advance;
-        document.getElementById('balance').value = balance.toFixed(2);
-    }
+ 
 
-    // Add event listeners to initial input fields
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', calculateTotalCharge);
+
+
+
+    document.querySelectorAll('#inputContainer input[name="toll[]"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+
+    });
+    document.querySelectorAll('#inputContainer1 input[name="guidefee[]"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+ 
+    });
+    document.querySelectorAll('#inputContainer2 input[name="add_charges[]"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+       
+    });
+    document.querySelectorAll('#inputContainer3 input[name="pf[]"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+
+
+
     });
 
-    // Initial calculation
-    calculateTotalCharge();
+    document.querySelectorAll('#inputContainer4 input[name="entrance"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+    });
+    document.querySelectorAll('#inputContainer5 input[name="permit"]').forEach(input => {
+        totalCharge += parseFloat(input.value) || 0;
+    });
 
+    document.getElementById('tot_charge').value = totalCharge.toFixed(2);
+
+
+
+    calculateBalance();
+}
+
+// Calculate balance
+function calculateBalance() {
+    var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+    var advance = parseFloat(document.getElementById('advance').value) || 0;
+    var balance = totalCharge - advance;
+    document.getElementById('balance').value = balance.toFixed(2);
+}
+
+// Add event listeners to initial input fields
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', calculateTotalCharge);
+});
+
+// Initial calculation
+calculateTotalCharge();
 
 // Ride Hours
-
 document.getElementById('strt_time').addEventListener('change', calculateRideHours);
-    document.getElementById('end_time').addEventListener('change', calculateRideHours);
+document.getElementById('end_time').addEventListener('change', calculateRideHours);
 
-    function calculateRideHours() {
-        const startTime = document.getElementById('strt_time').value;
-        const endTime = document.getElementById('end_time').value;
+function calculateRideHours() {
+    const startTime = document.getElementById('strt_time').value;
+    const endTime = document.getElementById('end_time').value;
 
-        if (startTime && endTime) {
-            const start = new Date(startTime);
-            const end = new Date(endTime);
+    if (startTime && endTime) {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
 
-            if (end > start) {
-                const diff = (end - start) / (1000 * 60 * 60); // difference in hours
-                document.getElementById('ride_hours').value = diff.toFixed(2); // display with two decimal places
-            } else {
-                document.getElementById('ride_hours').value = 'Invalid time range';
-            }
+        if (end > start) {
+            const diff = (end - start) / (1000 * 60 * 60); 
+            document.getElementById('ride_hours').value = diff.toFixed(2); 
+        } else {
+            document.getElementById('ride_hours').value = 'Invalid time range';
         }
     }
 
+    calculateTotalCharge();
+}
 
+// Calculate balance
+function calculateBalance() {
+    var totalCharge = parseFloat(document.getElementById('tot_charge').value) || 0;
+    var advance = parseFloat(document.getElementById('advance').value) || 0;
+    var balance = totalCharge - advance;
+    document.getElementById('balance').value = balance.toFixed(2);
+}
 
+// Add event listeners to initial input fields
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', calculateTotalCharge);
+});
+
+// Initial calculation
+calculateTotalCharge();
+
+// Ride Hours
+document.getElementById('strt_time').addEventListener('change', calculateRideHours);
+document.getElementById('end_time').addEventListener('change', calculateRideHours);
+
+function calculateRideHours() {
+    const startTime = document.getElementById('strt_time').value;
+    const endTime = document.getElementById('end_time').value;
+
+    if (startTime && endTime) {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+
+        if (end > start) {
+            const diff = (end - start) / (1000 * 60 * 60); 
+            document.getElementById('ride_hours').value = diff.toFixed(2); 
+        } else {
+            document.getElementById('ride_hours').value = 'Invalid time range';
+        }
+    }
+}
+
+function calculateTotalKm() {
+    var startKm = parseFloat(document.getElementById('strt_km').value);
+    var endKm = parseFloat(document.getElementById('end_km').value);
+    var totalKm = 0;
+    
+    if (!isNaN(startKm) && !isNaN(endKm)) {
+        totalKm = endKm - startKm;
+    }
+
+    document.getElementById('tot_km').value = totalKm;
+}
 
 
     $(document).ready(function() {
@@ -456,19 +651,30 @@ document.getElementById('strt_time').addEventListener('change', calculateRideHou
             if ($('#trip_type').is(':checked')) {
                 $('#kilometerFields').hide();
                 $('#hourFields').show();
+                $('#maxKmField').hide();
+                $('#maxHourField').show();
+                $('#hide_start_time').hide();
+                $('#hide_time_arrival').hide();
+                
 
                 // Adjust required attributes
-                $("#strt_time").prop('required',true);
-                $("#end_time").prop('required',true);
-                $("#start_km").prop('required',false);
+                $("#strt_time").prop('required', true);
+                
+                $("#strt_km").prop('required', false);
+                $("#time").prop('required', false);
             } else {
                 $('#kilometerFields').show();
                 $('#hourFields').hide();
+                $('#maxKmField').show();
+                $('#maxHourField').hide();
+                $('#hide_start_time').show();
+                $('#hide_time_arrival').show();
 
                 // Adjust required attributes
-                $("#strt_time").prop('required',false);
-                $("#end_time").prop('required',false);
-                $("#start_km").prop('required',true);
+                $("#strt_time").prop('required', false);
+               
+                $("#strt_km").prop('required', true);
+                $("#time").prop('required', true);
             }
         }
 
@@ -500,6 +706,7 @@ document.getElementById('strt_time').addEventListener('change', calculateRideHou
                 console.error('Error:', error);
             });
         });
+    
 
 
         // Custom Bootstrap validation
@@ -518,79 +725,6 @@ document.getElementById('strt_time').addEventListener('change', calculateRideHou
                 })
         })();
     });
-
-
-// (function () {
-//             'use strict';
-//             var forms = document.querySelectorAll('.needs-validation');
-//             Array.prototype.slice.call(forms)
-//                 .forEach(function (form) {
-//                     form.addEventListener('submit', function (event) {
-//                         if (!form.checkValidity()) {
-//                             event.preventDefault();
-//                             event.stopPropagation();
-//                         }
-//                         form.classList.add('was-validated');
-//                     }, false);
-//                 });
-//         })();
-
-
-
-
-//     document.addEventListener('DOMContentLoaded', function () {
-//     // Existing JavaScript for form validation and handling
-
-//     document.getElementById('getLastTripBtn').addEventListener('click', function() {
-//         fetch('/get_last_trip_details')
-//             .then(response => response.json())
-//             .then(data => {
-//                 if (data.error) {
-//                     const messageContainer = document.getElementById('message-container');
-//                     messageContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-//                 } else {
-//                     // Populate the form with the last trip data
-//                     document.getElementsByName('trip_no')[0].value = data.trip_no;
-//                     document.getElementsByName('date')[0].value = data.date;
-//                     document.getElementsByName('vehicle_name')[0].value = data.vehicle_name;
-//                     document.getElementsByName('vehicle_number')[0].value = data.vehicle_number;
-//                     document.getElementsByName('fixed_charge')[0].value = data.fixed_charge;
-//                     document.getElementsByName('max_km')[0].value = data.max_km;
-//                     document.getElementsByName('extra_charge')[0].value = data.extra_charge;
-//                     document.getElementsByName('driver_name')[0].value = data.driver_name;
-//                     document.getElementsByName('guest_name')[0].value = data.guest_name;
-//                     document.getElementsByName('start_km')[0].value = data.start_km;
-//                     document.getElementsByName('end_km')[0].value = data.end_km;
-//                     document.getElementsByName('strt_place')[0].value = data.strt_place;
-//                     document.getElementsByName('time')[0].value = data.time;
-//                     document.getElementsByName('destination')[0].value = data.destination;
-//                     document.getElementsByName('time_arrival')[0].value = data.time_arrival;
-//                     document.getElementsByName('arrival_date')[0].value = data.arrival_date;
-//                     document.getElementsByName('trip_days')[0].value = data.trip_days;
-//                     document.getElementsByName('toll')[0].value = data.toll;
-//                     document.getElementsByName('guidefee')[0].value = data.guidefee;
-//                     document.getElementsByName('add_charges')[0].value = data.add_charges;
-//                     document.getElementsByName('tot_charge')[0].value = data.tot_charge;
-//                     document.getElementsByName('advance')[0].value = data.advance;
-//                     document.getElementsByName('balance')[0].value = data.balance;
-//                 }
-//             })
-//             .catch(error => {
-//                 console.error('Error fetching last trip details:', error);
-//             });
-//     });
-// });
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -622,49 +756,150 @@ document.getElementById('strt_time').addEventListener('change', calculateRideHou
 
 document.addEventListener("DOMContentLoaded", function() {
 
-    function addInputField(containerId, inputName, placeholderText) {
-        const container = document.getElementById(containerId);
-        const newInputGroup = document.createElement("div");
-        newInputGroup.classList.add("input-group");
+function addInputField(containerId, inputName, placeholderText, isTextInput = false) {
+    const container = document.getElementById(containerId);
+    const newInputGroup = document.createElement("div");
+    newInputGroup.classList.add("input-group", "mb-2");
+
+    if (isTextInput) {
         newInputGroup.innerHTML = `
-            <input class="form-control mb-2" type="number" name="${inputName}" placeholder="${placeholderText}" required>
-            <button class="btn btn-outline-secondary remove-btn mb-2" type="button">-</button>
+
+        
+            <input class="form-control" type="text" name="${inputName}[]" placeholder="${placeholderText}" required>
+            <button class="btn btn-outline-secondary remove-btn" type="button">-</button>          
         `;
-        container.appendChild(newInputGroup);
-        newInputGroup.querySelector('input').addEventListener('input', calculateTotalCharge);
+    } else {
+        newInputGroup.innerHTML = `
+            <input class="form-control" type="number" name="${inputName}[]" placeholder="${placeholderText}" required>
+            <button class="btn btn-outline-secondary remove-btn" type="button">-</button>
+        `;
     }
 
-    // Function to remove input fields
-    function removeInputField(event) {
-        const parentInputGroup = event.target.parentElement;
-        parentInputGroup.querySelector('input').removeEventListener('input', calculateTotalCharge);
-        parentInputGroup.remove();
-        calculateTotalCharge();
+    container.appendChild(newInputGroup);
+    newInputGroup.querySelector('input').addEventListener('input', calculateTotalCharge);
+}
+
+// Function to remove input fields
+function removeInputField(event) {
+    const parentInputGroup = event.target.parentElement;
+    parentInputGroup.querySelector('input').removeEventListener('input', calculateTotalCharge);
+    parentInputGroup.remove();
+    calculateTotalCharge();
+}
+
+// Event listeners for adding input fields
+document.addEventListener("click", function(event) {
+    if (event.target.classList.contains("add-btn")) {
+        addInputField("inputContainer", "toll", "Toll*");
     }
-
-    // Event listeners for adding input fields
-    document.addEventListener("click", function(event) {
-        if (event.target.classList.contains("add-btn")) {
-            addInputField("inputContainer", "toll", "Toll*");
-        }
-        if (event.target.classList.contains("add-btn2")) {
-            addInputField("inputContainer1", "guidefee", "Guide Fee*");
-        }
-        if (event.target.classList.contains("add-btn3")) {
-            addInputField("inputContainer2", "add_charges", "Extra expenses*");
-        }
-        if (event.target.classList.contains("remove-btn")) {
-            removeInputField(event);
-        }
-    });
-
-    // Dynamic Trip number
-    var tripNumber = document.getElementById('trip_no_hidden').value;
-    document.getElementById('trip_no_display').value = tripNumber;
-
-    
-    
+    if (event.target.classList.contains("add-btn2")) {
+        addInputField("inputContainer1", "guidefee", "Guide Fee*");
+    }
+    if (event.target.classList.contains("add-btn3")) {
+        addInputField("inputContainer2", "add_charges", "Other charges");
+        addInputField("inputContainer2", "other_desc", "Other charges description", true);
+    }
+    if (event.target.classList.contains("add-btn4")) {
+        addInputField("inputContainer3", "pf", "Parking fee*");
+    }
+    if (event.target.classList.contains("remove-btn")) {
+        removeInputField(event);
+    }
 });
+
+// Dynamic Trip number
+var tripNumber = document.getElementById('trip_no_hidden').value;
+document.getElementById('trip_no_display').value = tripNumber;
+
+// Ensure existing input fields have the right event listeners
+document.querySelectorAll('.input-group input').forEach(function(input) {
+    input.addEventListener('input', calculateTotalCharge);
+});
+
+
+
+            let hourIndex = 1;
+
+            function addHourField() {
+                console.log('error')
+                const hourFields = document.getElementById("hourFields");
+                const newFieldSet = document.createElement("div");
+                newFieldSet.classList.add("row", "mt-3");
+                newFieldSet.innerHTML = `
+                    <div class="col">
+                        <label for="strt_time_${hourIndex}">Start*</label>
+                        <input class="form-control" type="datetime-local" id="strt_time_${hourIndex}" name="strt_time[]" placeholder="Starting Time" required>
+                        <div class="valid-feedback">Starting time is valid!</div>
+                        <div class="invalid-feedback">Starting time is required</div>
+                    </div>
+                    <div class="col">
+                        <label for="end_time_${hourIndex}">End*</label>
+                        <input class="form-control" type="datetime-local" id="end_time_${hourIndex}" name="end_time[]" placeholder="Ending Time" >
+                        <div class="valid-feedback">Ending time is valid!</div>
+                        <div class="invalid-feedback">Ending time is required</div>
+                    </div>
+                    <div class="">
+                        <label for="ride_hours_${hourIndex}">Hours</label>
+                        <input class="form-control" type="text" id="ride_hours_${hourIndex}" name="ride_hours[]" placeholder="Ride Hours" readonly>
+                       
+                    </div>
+                    <div class=" mt-4">
+                       
+                        <button class="btn btn-outline-secondary remove-hour" type="button">-</button>
+                        
+                    </div>
+                `;
+                hourFields.appendChild(newFieldSet);
+
+                newFieldSet.querySelector(`#strt_time_${hourIndex}`).addEventListener('input', calculateRideHours);
+                newFieldSet.querySelector(`#end_time_${hourIndex}`).addEventListener('input', calculateRideHours);
+
+                hourIndex++;
+            }
+
+            function removeHourField(event) {
+                const parentRow = event.target.parentElement.parentElement;
+                parentRow.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+                    input.removeEventListener('input', calculateRideHours);
+                });
+                parentRow.remove();
+            }
+
+            function calculateRideHours() {
+                for (let i = 0; i < hourIndex; i++) {
+                    const startTime = document.getElementById(`strt_time_${i}`);
+                    const endTime = document.getElementById(`end_time_${i}`);addHourField
+                    const rideHours = document.getElementById(`ride_hours_${i}`);
+                    if (startTime && endTime && rideHours && startTime.value && endTime.value) {
+                        const start = new Date(startTime.value);
+                        const end = new Date(endTime.value);
+                        const diff = (end - start) / 3600000;
+                        if (diff > 0) {
+                            rideHours.value = diff.toFixed(2);
+                        } else {
+                            rideHours.value = "";
+                        }
+                    }
+                }
+            }
+
+            document.addEventListener("click", function(event) {
+                if (event.target.classList.contains("add-hour")) {
+                    console.log('function called')
+                    addHourField();
+                }
+                if (event.target.classList.contains("remove-hour")) {
+                    removeHourField(event);
+                }
+            });
+
+            document.getElementById('strt_time').addEventListener('input', calculateRideHours);
+            document.getElementById('end_time').addEventListener('input', calculateRideHours);
+        });
+
+    
+    
+
 </script>
 
 
